@@ -14,6 +14,7 @@ export const checkPrerequisitesTool = {
       ARCH=$(uname -m)
       HAS_NFT=$(check_cmd nft)
       HAS_IPTABLES=$(check_cmd iptables)
+      HAS_IPSET=$(check_cmd ipset)
       HAS_CURL=$(check_cmd curl)
       HAS_GREP=$(check_cmd grep)
       HAS_SED=$(check_cmd sed)
@@ -25,7 +26,7 @@ export const checkPrerequisitesTool = {
       if [ -d "/opt/zapret2" ]; then ZAPRET_DIR="true"; fi
 
       NFQWS_BIN="false"
-      if [ -x "/opt/zapret2/nfqws2" ]; then NFQWS_BIN="true"; fi
+      if [ -x "/opt/zapret2/nfq2/nfqws2" ]; then NFQWS_BIN="true"; fi
 
       NETWORK="false"
       if curl -sI --max-time 5 https://github.com >/dev/null 2>&1; then NETWORK="true"; fi
@@ -84,6 +85,7 @@ export const checkPrerequisitesTool = {
   "tools": {
     "nft": $HAS_NFT,
     "iptables": $HAS_IPTABLES,
+    "ipset": $HAS_IPSET,
     "curl": $HAS_CURL,
     "grep": $HAS_GREP,
     "sed": $HAS_SED,

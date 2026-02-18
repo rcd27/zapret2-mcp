@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.3.3] - 2026-02-18
+
+### Fixed
+- **`installZapret` неверный путь к бинарнику** — `nfqwsBinaryExists` всегда возвращал `false`, т.к. проверялся `/opt/zapret2/nfqws2` вместо `/opt/zapret2/nfq2/nfqws2` (в `checkPrerequisites` и выводе `installZapret`)
+- **`installZapret force=true` не пересоздавал конфиг** — при повторной установке конфиг оставался старым; теперь `force=true` пересоздаёт и репо, и конфиг
+- **`createSystemdService` `Restart=on-failure` конфликт** — при `Type=forking` + `RemainAfterExit=yes` мог вызывать бесконечные перезапуски после `stopService`; заменено на `Restart=no`
+- **`updateConfig` значения без кавычек** — значения с пробелами записывались без кавычек (`KEY=val1 val2`), что при `source config` ломало парсинг; теперь всегда `KEY="value"`
+- **`getStatus`/`verifyBypass` `firewallRulesCount` = `"0\n0"`** — `grep -c ... || echo 0` при нулевых совпадениях выдавал `0\n0` (невалидный JSON); заменено на `${VAR:-0}`
+- **`getStatus`/`verifyBypass` `firewallRulesCount` = 0 без root** — `iptables -L` без sudo всегда давал 0 для не-root пользователей; добавлен `sudo`
+- **`getStatus` `nfqws2Enabled: ""1""`** — `cut -d= -f2` возвращал значение вместе с кавычками из конфига; добавлен `tr -d '"'` для `FWTYPE` и `NFQWS2_ENABLE`
+- **Шаблон конфига `installZapret` не содержал `INIT_APPLY_FW=1`** — без этого параметра init-скрипт не применял firewall-правила при старте сервиса
+- **Шаблон конфига не содержал `NFQWS2_PORTS_TCP/UDP`** — без портов iptables-правила для NFQUEUE не создавались; добавлены дефолты `80,443` / `443` и пакетные счётчики из `config.default`
+- **`checkPrerequisites` не проверял наличие `ipset`** — необходим для работы firewall-правил zapret2; добавлен в список инструментов
+
 ## [0.3.2] - 2026-02-18
 
 ### Fixed

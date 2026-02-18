@@ -22,8 +22,7 @@ ExecStart=/opt/zapret2/init.d/sysv/zapret2 start
 ExecStop=/opt/zapret2/init.d/sysv/zapret2 stop
 ExecReload=/opt/zapret2/init.d/sysv/zapret2 restart
 RemainAfterExit=yes
-Restart=on-failure
-RestartSec=5
+Restart=no
 
 [Install]
 WantedBy=multi-user.target`;

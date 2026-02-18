@@ -12,14 +12,18 @@ export const getStatusTool = {
       if [ -n "$PID" ]; then RUNNING=true; fi
 
       FW_RULES=0
-      FWTYPE=$(grep -E '^FWTYPE=' /opt/zapret2/config 2>/dev/null | cut -d= -f2 || echo "")
+      SUDO=""
+      [ "$(id -u)" != "0" ] && SUDO="sudo"
+      FWTYPE=$(grep -E '^FWTYPE=' /opt/zapret2/config 2>/dev/null | cut -d= -f2 | tr -d '"' || echo "")
       if [ "$FWTYPE" = "nftables" ] && command -v nft >/dev/null 2>&1; then
-        FW_RULES=$(nft list ruleset 2>/dev/null | grep -c zapret 2>/dev/null || echo 0)
+        FW_RULES=$($SUDO nft list ruleset 2>/dev/null | grep -c zapret 2>/dev/null)
+        FW_RULES=\${FW_RULES:-0}
       elif command -v iptables >/dev/null 2>&1; then
-        FW_RULES=$(iptables -t mangle -L -n 2>/dev/null | grep -c NFQUEUE 2>/dev/null || echo 0)
+        FW_RULES=$($SUDO iptables -t mangle -L -n 2>/dev/null | grep -c NFQUEUE 2>/dev/null)
+        FW_RULES=\${FW_RULES:-0}
       fi
 
-      ENABLED=$(grep -E '^NFQWS2_ENABLE=' /opt/zapret2/config 2>/dev/null | cut -d= -f2 || echo "unknown")
+      ENABLED=$(grep -E '^NFQWS2_ENABLE=' /opt/zapret2/config 2>/dev/null | cut -d= -f2 | tr -d '"' || echo "unknown")
 
       echo "{\\"running\\": $RUNNING, \\"pid\\": \\"$PID\\", \\"firewallRulesCount\\": $FW_RULES, \\"fwtype\\": \\"$FWTYPE\\", \\"nfqws2Enabled\\": \\"$ENABLED\\"}"
     `;

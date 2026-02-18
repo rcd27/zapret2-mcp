@@ -40,11 +40,15 @@ export const verifyBypassTool = {
 
       # Check firewall rules
       FW_RULES=0
+      SUDO=""
+      [ "$(id -u)" != "0" ] && SUDO="sudo"
       if command -v nft >/dev/null 2>&1; then
-        FW_RULES=$(nft list ruleset 2>/dev/null | grep -c zapret 2>/dev/null || echo 0)
+        FW_RULES=$($SUDO nft list ruleset 2>/dev/null | grep -c zapret 2>/dev/null)
+        FW_RULES=\${FW_RULES:-0}
       fi
       if [ "$FW_RULES" -eq 0 ] && command -v iptables >/dev/null 2>&1; then
-        FW_RULES=$(iptables -t mangle -L -n 2>/dev/null | grep -c NFQUEUE 2>/dev/null || echo 0)
+        FW_RULES=$($SUDO iptables -t mangle -L -n 2>/dev/null | grep -c NFQUEUE 2>/dev/null)
+        FW_RULES=\${FW_RULES:-0}
       fi
 
       BYPASS_CONFIRMED="false"

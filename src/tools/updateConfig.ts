@@ -34,11 +34,11 @@ export const updateConfigTool = {
         VALUE=$(printf '%s' '${b64Value}' | base64 -d)
         export VALUE
         if grep -qE '^${safeKey}=' /opt/zapret2/config; then
-          awk -v key="${safeKey}" 'BEGIN{val=ENVIRON["VALUE"]} $0 ~ "^" key "=" {print key "=" val; next} {print}' /opt/zapret2/config | $SUDO tee /opt/zapret2/config.tmp > /dev/null
+          awk -v key="${safeKey}" 'BEGIN{val=ENVIRON["VALUE"]} $0 ~ "^" key "=" {print key "=\\"" val "\\""; next} {print}' /opt/zapret2/config | $SUDO tee /opt/zapret2/config.tmp > /dev/null
           $SUDO mv /opt/zapret2/config.tmp /opt/zapret2/config
           echo "Updated ${safeKey}"
         else
-          printf '%s=%s\\n' '${safeKey}' "$VALUE" | $SUDO tee -a /opt/zapret2/config > /dev/null
+          printf '%s="%s"\\n' '${safeKey}' "$VALUE" | $SUDO tee -a /opt/zapret2/config > /dev/null
           echo "Added ${safeKey}"
         fi
         NEWVAL=$(grep -E '^${safeKey}=' /opt/zapret2/config)

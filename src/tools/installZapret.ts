@@ -24,7 +24,7 @@ export const installZapretTool = {
       fi
 
       # Clone repo
-      if [ ! -d "/opt/zapret2/.git" ]; then
+      if [ ! -d "/opt/zapret2/.git" ] || [ "${force}" = "true" ]; then
         $SUDO rm -rf /opt/zapret2
         $SUDO mkdir -p /opt/zapret2
         $SUDO git clone --depth 1 https://github.com/bol-van/zapret2.git /opt/zapret2
@@ -42,8 +42,8 @@ export const installZapretTool = {
       # Install binaries
       cd /opt/zapret2 && $SUDO sh install_bin.sh
 
-      # Create base config if missing
-      if [ ! -f /opt/zapret2/config ]; then
+      # Create base config (always recreate on force, otherwise only if missing)
+      if [ ! -f /opt/zapret2/config ] || [ "${force}" = "true" ]; then
         WAN_IFACE=$(ip route get 8.8.8.8 2>/dev/null | awk '/dev/{for(i=1;i<=NF;i++){if($i=="dev"){print $(i+1);exit}}}')
         WAN_IFACE=\${WAN_IFACE:-}
         if command -v nft >/dev/null 2>&1; then FWTYPE=nftables; else FWTYPE=iptables; fi
@@ -51,7 +51,14 @@ export const installZapretTool = {
           "FWTYPE=$FWTYPE" \
           "MODE=nfqws2" \
           "NFQWS2_ENABLE=0" \
-          'NFQWS2_OPT="--payload=http_req --lua-desync=fake"' \
+          "INIT_APPLY_FW=1" \
+          'NFQWS2_OPT=""' \
+          "NFQWS2_PORTS_TCP=80,443" \
+          "NFQWS2_PORTS_UDP=443" \
+          "NFQWS2_TCP_PKT_OUT=20" \
+          "NFQWS2_TCP_PKT_IN=10" \
+          "NFQWS2_UDP_PKT_OUT=5" \
+          "NFQWS2_UDP_PKT_IN=3" \
           "FLOWOFFLOAD=none" \
           "IFACE_WAN=$WAN_IFACE" \
           "IFACE_LAN=" \
@@ -61,7 +68,7 @@ export const installZapretTool = {
 
       echo "INSTALL_OK"
       echo "Version: ${version}"
-      echo "Binary: $(ls -la /opt/zapret2/nfqws2 2>/dev/null || echo 'not found')"
+      echo "Binary: $(ls -la /opt/zapret2/nfq2/nfqws2 2>/dev/null || echo 'not found')"
     `;
 
     try {
