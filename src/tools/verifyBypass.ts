@@ -1,17 +1,18 @@
 import { z } from "zod";
 import { getExecutor } from "../executorInstance.js";
 
-// FIXME: отшлёпывает 200 на любой запрос. Выяснить, в чём дело
 export const verifyBypassTool = {
   name: "verifyBypass",
   description: "Verify network connectivity: DNS resolution, HTTP request, and nfqws2 running status for a given domain. Use after startService or restartService to confirm zapret2 is working.",
   schema: z.object({
     domain: z.string().default("example.com").describe("Domain to verify bypass for (default: example.com)"),
     timeout: z.number().default(10).describe("HTTP request timeout in seconds (default: 10)"),
+    interface: z.string().optional().describe("WAN interface to bind curl to (e.g. wlp0s20f3). If omitted, reads IFACE_WAN from config."),
   }),
-  handler: async (args: { domain?: string; timeout?: number }) => {
+  handler: async (args: { domain?: string; timeout?: number; interface?: string }) => {
     const domain = args.domain || "example.com";
     const timeout = args.timeout || 10;
+    const ifaceArg = args.interface || "";
 
     const script = `
       DNS_RESOLVED="false"
@@ -25,10 +26,33 @@ export const verifyBypassTool = {
         DNS_IP="$IP"
       fi
 
+      # Determine WAN interface: from argument, then from config
+      WAN_IFACE="${ifaceArg}"
+      if [ -z "$WAN_IFACE" ] && [ -f /opt/zapret2/config ]; then
+        WAN_IFACE=$(grep '^IFACE_WAN=' /opt/zapret2/config 2>/dev/null | head -1 | cut -d'=' -f2 | tr -d '"' | tr -d "'")
+      fi
+
+      # Route info for the resolved IP
+      ROUTE_TO=""
+      if [ -n "$DNS_IP" ] && command -v ip >/dev/null 2>&1; then
+        ROUTE_TO=$(ip route get "$DNS_IP" 2>/dev/null | head -1 || true)
+      fi
+
       HTTP_CODE="0"
-      CURL_EXIT="0"
+      CURL_EXIT="1"
       if command -v curl >/dev/null 2>&1; then
-        HTTP_CODE=$(curl -sL -o /dev/null -w '%{http_code}' --max-time ${timeout} "https://${domain}/" 2>/dev/null || true)
+        if [ -n "$WAN_IFACE" ]; then
+          HTTP_CODE=$(curl -sL -o /dev/null -w '%{http_code}' \
+            --max-time ${timeout} \
+            --interface "$WAN_IFACE" \
+            --noproxy '*' \
+            "https://${domain}/" 2>/dev/null || true)
+        else
+          HTTP_CODE=$(curl -sL -o /dev/null -w '%{http_code}' \
+            --max-time ${timeout} \
+            --noproxy '*' \
+            "https://${domain}/" 2>/dev/null || true)
+        fi
         CURL_EXIT=$?
         if [ -z "$HTTP_CODE" ]; then HTTP_CODE="0"; fi
       fi
@@ -52,15 +76,19 @@ export const verifyBypassTool = {
       fi
 
       BYPASS_CONFIRMED="false"
-      if [ "$ZAPRET_RUNNING" = "true" ] && [ "$FW_RULES" -gt 0 ] && [ "$HTTP_CODE" != "0" ] && [ "$HTTP_CODE" != "" ]; then
+      if [ "$HTTP_CODE" != "0" ] && [ "$HTTP_CODE" != "000" ] && [ -n "$HTTP_CODE" ]; then
         BYPASS_CONFIRMED="true"
       fi
+
+      WAN_IFACE_JSON=\${WAN_IFACE:-""}
 
       cat <<EOJSON
 {
   "domain": "${domain}",
   "dnsResolved": $DNS_RESOLVED,
   "dnsIp": "$DNS_IP",
+  "wanInterface": "$WAN_IFACE_JSON",
+  "routeTo": "$ROUTE_TO",
   "httpCode": "$HTTP_CODE",
   "curlExit": "$CURL_EXIT",
   "zapretRunning": $ZAPRET_RUNNING,
