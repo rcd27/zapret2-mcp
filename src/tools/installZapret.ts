@@ -45,8 +45,9 @@ export const installZapretTool = {
       if [ ! -f /opt/zapret2/config ]; then
         WAN_IFACE=$(ip route get 8.8.8.8 2>/dev/null | awk '/dev/{for(i=1;i<=NF;i++){if($i=="dev"){print $(i+1);exit}}}')
         WAN_IFACE=\${WAN_IFACE:-}
+        if command -v nft >/dev/null 2>&1; then FWTYPE=nftables; else FWTYPE=iptables; fi
         printf '%s\\n' \
-          "FWTYPE=nftables" \
+          "FWTYPE=$FWTYPE" \
           "MODE=nfqws2" \
           "NFQWS2_ENABLE=0" \
           'NFQWS2_OPT="--payload=http_req --lua-desync=fake"' \

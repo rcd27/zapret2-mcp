@@ -9,7 +9,7 @@ export const restartServiceTool = {
   handler: async () => {
     try {
       const { stdout, stderr } = await getExecutor().exec(
-        'SUDO=""; [ "$(id -u)" != "0" ] && SUDO="sudo"; $SUDO /opt/zapret2/init.d/sysv/zapret2 restart'
+        'SUDO=""; [ "$(id -u)" != "0" ] && SUDO="sudo"; if [ -f /etc/systemd/system/zapret2.service ]; then $SUDO systemctl restart zapret2; else $SUDO /opt/zapret2/init.d/sysv/zapret2 restart; fi'
       );
       const output = (stdout + stderr).trim() || "Service restarted";
       saveLog("service", output, { action: "restart" });

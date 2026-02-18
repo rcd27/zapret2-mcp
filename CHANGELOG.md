@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.3.1] - 2026-02-18
+
+### Fixed
+- **`updateConfig` не записывал значения** — добавлен `sudo`, `set -e`, запись через `tee` вместо redirect (BUG-01)
+- **Service tools не работали с systemd** — `startService`, `stopService`, `restartService` теперь автоматически определяют systemd unit и используют `systemctl` (BUG-02/03)
+- **`installZapret` ставил FWTYPE=nftables без nft** — автодетект: `nft` есть → `nftables`, иначе → `iptables` (BUG-04)
+- **`runBlockcheck` оставлял зомби-процессы и мусорные fw rules** — systemd-aware stop, `setsid` для process group, cleanup nfqws2 и mangle rules после завершения (BUG-05/10)
+- **`runBlockcheck` возвращал stdout как error** — non-zero exit с полезным stdout обрабатывается как успешный результат (BUG-06)
+- **`verifyBypass` давал ложно-положительный результат** — добавлена проверка firewall rules (iptables/nft), новые поля `firewallRulesCount` и `bypassConfirmed` (BUG-08)
+
+### Changed
+- **`getStatus`**: `nftRulesCount` → `firewallRulesCount` — считает rules по FWTYPE из конфига (nft или iptables), добавлено поле `fwtype` (UX-05)
+- `updateConfig` показывает новое значение ключа после записи (UX-07)
+
 ## [0.3.0] - 2026-02-18
 
 ### Added

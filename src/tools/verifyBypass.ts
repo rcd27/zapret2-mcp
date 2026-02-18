@@ -38,6 +38,20 @@ export const verifyBypassTool = {
         ZAPRET_RUNNING="true"
       fi
 
+      # Check firewall rules
+      FW_RULES=0
+      if command -v nft >/dev/null 2>&1; then
+        FW_RULES=$(nft list ruleset 2>/dev/null | grep -c zapret 2>/dev/null || echo 0)
+      fi
+      if [ "$FW_RULES" -eq 0 ] && command -v iptables >/dev/null 2>&1; then
+        FW_RULES=$(iptables -t mangle -L -n 2>/dev/null | grep -c NFQUEUE 2>/dev/null || echo 0)
+      fi
+
+      BYPASS_CONFIRMED="false"
+      if [ "$ZAPRET_RUNNING" = "true" ] && [ "$FW_RULES" -gt 0 ] && [ "$HTTP_CODE" != "0" ] && [ "$HTTP_CODE" != "" ]; then
+        BYPASS_CONFIRMED="true"
+      fi
+
       cat <<EOJSON
 {
   "domain": "${domain}",
@@ -45,7 +59,9 @@ export const verifyBypassTool = {
   "dnsIp": "$DNS_IP",
   "httpCode": "$HTTP_CODE",
   "curlExit": "$CURL_EXIT",
-  "zapretRunning": $ZAPRET_RUNNING
+  "zapretRunning": $ZAPRET_RUNNING,
+  "firewallRulesCount": $FW_RULES,
+  "bypassConfirmed": $BYPASS_CONFIRMED
 }
 EOJSON
     `;

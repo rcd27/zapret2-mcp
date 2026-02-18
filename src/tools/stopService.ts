@@ -9,7 +9,7 @@ export const stopServiceTool = {
   handler: async () => {
     try {
       const { stdout, stderr } = await getExecutor().exec(
-        'SUDO=""; [ "$(id -u)" != "0" ] && SUDO="sudo"; $SUDO /opt/zapret2/init.d/sysv/zapret2 stop'
+        'SUDO=""; [ "$(id -u)" != "0" ] && SUDO="sudo"; if [ -f /etc/systemd/system/zapret2.service ]; then $SUDO systemctl stop zapret2; else $SUDO /opt/zapret2/init.d/sysv/zapret2 stop; fi'
       );
       const output = (stdout + stderr).trim() || "Service stopped";
       saveLog("service", output, { action: "stop" });

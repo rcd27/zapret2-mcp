@@ -9,7 +9,7 @@ export const startServiceTool = {
   handler: async () => {
     try {
       const { stdout, stderr } = await getExecutor().exec(
-        'SUDO=""; [ "$(id -u)" != "0" ] && SUDO="sudo"; $SUDO /opt/zapret2/init.d/sysv/zapret2 start'
+        'SUDO=""; [ "$(id -u)" != "0" ] && SUDO="sudo"; if [ -f /etc/systemd/system/zapret2.service ]; then $SUDO systemctl start zapret2; else $SUDO /opt/zapret2/init.d/sysv/zapret2 start; fi'
       );
       const output = (stdout + stderr).trim() || "Service started";
       saveLog("service", output, { action: "start" });
