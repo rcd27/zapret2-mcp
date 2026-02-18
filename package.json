@@ -1,6 +1,6 @@
 {
   "name": "zapret2-mcp",
-  "version": "0.3.3",
+  "version": "0.3.4",
   "description": "MCP server for managing zapret2 network packet processing tool on OpenWrt routers and Linux desktops via Docker, SSH, or locally",
   "license": "MIT",
   "author": "Stanislav Zemlyakov",

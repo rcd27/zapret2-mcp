@@ -1,6 +1,6 @@
 # Changelog
 
-## [Unreleased]
+## [0.3.4] - 2026-02-18
 
 ### Added
 - **`removeZapret2` tool** — полный откат установки zapret2: остановка сервиса (init script + systemd), удаление systemd unit, принудительное завершение nfqws2, очистка firewall-правил (nftables/iptables), удаление `/opt/zapret2`. DNS-настройки не откатываются.
