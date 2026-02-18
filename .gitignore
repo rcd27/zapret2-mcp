@@ -1,0 +1,30 @@
+# Dependencies
+node_modules/
+
+# Build output
+build/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Environment
+.env
+
+# Test
+coverage/
+
+# Docker dev logs
+docker/logs/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# npm
+*.tgz
+
+# Dev scripts (local paths)
+inspect_mcp_local.sh

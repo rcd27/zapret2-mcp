@@ -1,0 +1,31 @@
+# Source
+src/
+tsconfig.json
+
+# Tests
+tests/
+vitest.config.ts
+vitest.integration.config.ts
+coverage/
+
+# Docker dev environment
+docker/
+
+# Docs (dev-only)
+docs/
+CLAUDE.md
+
+# IDE
+.idea/
+.vscode/
+
+# Dev files
+.env
+.env.example
+.gitignore
+.dockerignore
+inspect_mcp_local.sh
+package-lock.json
+
+# Claude
+.claude/

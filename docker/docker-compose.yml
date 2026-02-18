@@ -1,0 +1,17 @@
+services:
+  openwrt:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: zapret2-openwrt
+    network_mode: host
+    privileged: true
+    volumes:
+      - zapret2-data:/opt/zapret2
+      - ./logs:/var/log/zapret2
+    stdin_open: true
+    tty: true
+    restart: unless-stopped
+
+volumes:
+  zapret2-data:

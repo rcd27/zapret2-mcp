@@ -1,0 +1,64 @@
+{
+  "name": "zapret2-mcp",
+  "version": "0.3.0",
+  "description": "MCP server for managing zapret2 network packet processing tool on OpenWrt routers and Linux desktops via Docker, SSH, or locally",
+  "license": "MIT",
+  "author": "Stanislav Zemlyakov",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/rcd27/zapret2-mcp.git"
+  },
+  "homepage": "https://github.com/rcd27/zapret2-mcp#readme",
+  "bugs": {
+    "url": "https://github.com/rcd27/zapret2-mcp/issues"
+  },
+  "type": "module",
+  "main": "build/index.js",
+  "bin": {
+    "zapret2-mcp": "build/index.js"
+  },
+  "files": [
+    "build",
+    "README.md",
+    "LICENSE",
+    "CHANGELOG.md"
+  ],
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "keywords": [
+    "mcp",
+    "mcp-server",
+    "model-context-protocol",
+    "zapret",
+    "zapret2",
+    "network-tools",
+    "packet-processing",
+    "openwrt",
+    "nfqws",
+    "nfqws2",
+    "ai-agent",
+    "llm-tools"
+  ],
+  "scripts": {
+    "build": "tsc && chmod 755 build/index.js",
+    "start": "node build/index.js",
+    "prestart": "npm run build",
+    "dev": "npx @modelcontextprotocol/inspector node build/index.js",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:integration": "npm run build && vitest run --config vitest.integration.config.ts",
+    "test:coverage": "vitest run --coverage",
+    "prepublishOnly": "npm run build && npm test"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.6.0",
+    "zod": "^3.24.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "@vitest/coverage-v8": "^4.0.18",
+    "typescript": "^5.7.0",
+    "vitest": "^4.0.18"
+  }
+}
