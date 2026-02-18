@@ -45,8 +45,8 @@ describe("runBlockcheck tool", () => {
     expect(mock.calls[0].command).toContain('SUDO=""');
     expect(mock.calls[0].command).toContain('$(id -u)');
     expect(mock.calls[0].command).toContain('$SUDO /opt/zapret2/blockcheck2.sh');
-    // Verify correct stdin format: domain + ipVersion via setsid
-    expect(mock.calls[0].command).toContain("'example.com' '4'");
+    // Verify correct stdin format: test_number + domain + ipVersion via setsid
+    expect(mock.calls[0].command).toContain("'1' 'example.com' '4'");
     expect(mock.calls[0].command).toContain('setsid');
     expect(mock.calls[0].command).not.toContain('"Y"');
     // Verify cleanup after blockcheck

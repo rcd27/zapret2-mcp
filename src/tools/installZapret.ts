@@ -25,8 +25,9 @@ export const installZapretTool = {
 
       # Clone repo
       if [ ! -d "/opt/zapret2/.git" ]; then
-        $SUDO rm -rf /opt/zapret2/*
-        cd /opt && $SUDO git clone --depth 1 https://github.com/bol-van/zapret2.git zapret2
+        $SUDO rm -rf /opt/zapret2
+        $SUDO mkdir -p /opt/zapret2
+        $SUDO git clone --depth 1 https://github.com/bol-van/zapret2.git /opt/zapret2
       fi
 
       # Download and extract binaries

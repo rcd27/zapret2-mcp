@@ -25,7 +25,8 @@ export const runBlockcheckTool = {
       fi
 
       # Run blockcheck in its own process group
-      setsid sh -c "printf '%s\\n' '${domain}' '${ipVersion}' | $SUDO /opt/zapret2/blockcheck2.sh 2>&1" 2>&1
+      # blockcheck2.sh interactive stdin: test_number, domain, ip_version
+      setsid sh -c "printf '%s\\n' '1' '${domain}' '${ipVersion}' | $SUDO /opt/zapret2/blockcheck2.sh 2>&1" 2>&1
       BC_EXIT=$?
 
       # Cleanup: kill leftover nfqws2 processes spawned by blockcheck
