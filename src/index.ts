@@ -19,6 +19,7 @@ import { verifyBypassTool } from "./tools/verifyBypass.js";
 import { detectSystemTool } from "./tools/detectSystem.js";
 import { configureDnsTool } from "./tools/configureDns.js";
 import { createSystemdServiceTool } from "./tools/createSystemdService.js";
+import { removeZapretTool } from "./tools/removeZapret.js";
 import { registerResources } from "./resources.js";
 import { registerPrompts } from "./prompts.js";
 import { setOnLogSaved } from "./logStore.js";
@@ -65,6 +66,7 @@ const tools = [
   detectSystemTool,
   configureDnsTool,
   createSystemdServiceTool,
+  removeZapretTool,
 ];
 
 for (const tool of tools) {
