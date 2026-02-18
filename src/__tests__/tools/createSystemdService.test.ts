@@ -33,8 +33,12 @@ describe("createSystemdService tool", () => {
     const result = await tool.handler({ enable: true });
     expect(result.content[0].text).toContain("UNIT_CREATED");
     expect(result.content[0].text).toContain("Enabled: true");
-    // Verify the script contains systemctl enable
-    expect(mock.calls[0].command).toContain("systemctl enable");
+    // Verify the script contains systemctl enable with sudo
+    expect(mock.calls[0].command).toContain('SUDO=""');
+    expect(mock.calls[0].command).toContain('$(id -u)');
+    expect(mock.calls[0].command).toContain("$SUDO systemctl enable");
+    expect(mock.calls[0].command).toContain("$SUDO systemctl daemon-reload");
+    expect(mock.calls[0].command).toContain("$SUDO tee /etc/systemd/system/zapret2.service");
   });
 
   it("creates service without enabling when enable=false", async () => {
@@ -44,6 +48,8 @@ describe("createSystemdService tool", () => {
     expect(result.content[0].text).toContain("UNIT_CREATED");
     // Verify the script does NOT contain systemctl enable
     expect(mock.calls[0].command).not.toContain("systemctl enable");
+    expect(mock.calls[0].command).toContain('SUDO=""');
+    expect(mock.calls[0].command).toContain("$SUDO systemctl daemon-reload");
   });
 
   it("unit file contains correct content", async () => {

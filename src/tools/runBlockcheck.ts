@@ -7,25 +7,25 @@ export const runBlockcheckTool = {
   description: "Run blockcheck2.sh to find working network strategies for a domain. Stops zapret2 before running, collects AVAILABLE results. Heavy operation (~5 min). Full log saved to resources. Apply results via updateConfig NFQWS2_OPT.",
   schema: z.object({
     domain: z.string().default("example.com").describe("Domain to test against (default: example.com)"),
-    scanLevel: z.enum(["quick", "standard"]).default("quick").describe("Scan depth: quick or standard (default: quick)"),
+    ipVersion: z.enum(["4", "6", "46"]).default("4").describe("IP protocol version: 4, 6 or 46 for both (default: 4)"),
   }),
-  handler: async (args: { domain?: string; scanLevel?: "quick" | "standard" }) => {
+  handler: async (args: { domain?: string; ipVersion?: "4" | "6" | "46" }) => {
     const domain = args.domain || "example.com";
-    const scanLevel = args.scanLevel || "quick";
-
-    const scanNum = scanLevel === "quick" ? "1" : "2";
+    const ipVersion = args.ipVersion || "4";
 
     const script = `
-      /opt/zapret2/init.d/sysv/zapret2 stop 2>/dev/null || true
+      SUDO=""
+      [ "$(id -u)" != "0" ] && SUDO="sudo"
+      $SUDO /opt/zapret2/init.d/sysv/zapret2 stop 2>/dev/null || true
 
-      printf '%s\\n' "${domain}" "${scanNum}" "Y" | /opt/zapret2/blockcheck2.sh 2>&1
+      printf '%s\\n' "${domain}" "${ipVersion}" | $SUDO /opt/zapret2/blockcheck2.sh 2>&1
     `;
 
     try {
       const { stdout } = await getExecutor().exec(script, 300000);
       const fullOutput = stdout.trim();
 
-      const ts = saveLog("blockcheck", fullOutput, { domain, scanLevel });
+      const ts = saveLog("blockcheck", fullOutput, { domain, ipVersion });
 
       const filtered = fullOutput
         .split("\n")
@@ -39,7 +39,7 @@ export const runBlockcheckTool = {
       const output = (e.stdout || "") + (e.stderr || "");
 
       if (output) {
-        saveLog("blockcheck", output, { domain, scanLevel, error: "true" });
+        saveLog("blockcheck", output, { domain, ipVersion, error: "true" });
       }
 
       return {

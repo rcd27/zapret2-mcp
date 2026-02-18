@@ -32,6 +32,13 @@ describe("installZapret tool", () => {
     const tool = await loadTool();
     const result = await tool.handler({});
     expect(result.content[0].text).toContain("INSTALL_OK");
+    expect(mock.calls[0].command).toContain('SUDO=""');
+    expect(mock.calls[0].command).toContain('$(id -u)');
+    expect(mock.calls[0].command).toContain('$SUDO rm -rf');
+    expect(mock.calls[0].command).toContain('$SUDO git clone');
+    expect(mock.calls[0].command).toContain('$SUDO cp -r');
+    expect(mock.calls[0].command).toContain('$SUDO sh install_bin.sh');
+    expect(mock.calls[0].command).toContain('$SUDO tee /opt/zapret2/config');
   });
 
   it("returns already installed message when not forced", async () => {

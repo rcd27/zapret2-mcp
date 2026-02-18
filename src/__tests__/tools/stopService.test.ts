@@ -33,6 +33,9 @@ describe("stopService tool", () => {
     const result = await tool.handler();
     expect(result.content[0].text).toBe("Stopping zapret2...");
     expect(mock.calls[0].command).toContain("zapret2 stop");
+    expect(mock.calls[0].command).toContain('SUDO=""');
+    expect(mock.calls[0].command).toContain('$(id -u)');
+    expect(mock.calls[0].command).toContain('$SUDO');
   });
 
   it("uses fallback text when output is empty", async () => {

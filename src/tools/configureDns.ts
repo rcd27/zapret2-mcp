@@ -36,6 +36,8 @@ export const configureDnsTool = {
     if (method === "systemd-resolved") {
       script = `
         set -e
+        SUDO=""
+        [ "$(id -u)" != "0" ] && SUDO="sudo"
         DNS_IP=$(printf '%s' '${b64Ip}' | base64 -d)
 
         if ! command -v systemctl >/dev/null 2>&1; then
@@ -51,19 +53,19 @@ export const configureDnsTool = {
         # Backup current resolved config
         RESOLVED_CONF="/etc/systemd/resolved.conf"
         if [ -f "$RESOLVED_CONF" ]; then
-          cp "$RESOLVED_CONF" "$RESOLVED_CONF.bak"
+          $SUDO cp "$RESOLVED_CONF" "$RESOLVED_CONF.bak"
         fi
 
         # Update DNS setting
         if grep -q '^DNS=' "$RESOLVED_CONF" 2>/dev/null; then
-          sed -i "s/^DNS=.*/DNS=$DNS_IP/" "$RESOLVED_CONF"
+          $SUDO sed -i "s/^DNS=.*/DNS=$DNS_IP/" "$RESOLVED_CONF"
         elif grep -q '^#DNS=' "$RESOLVED_CONF" 2>/dev/null; then
-          sed -i "s/^#DNS=.*/DNS=$DNS_IP/" "$RESOLVED_CONF"
+          $SUDO sed -i "s/^#DNS=.*/DNS=$DNS_IP/" "$RESOLVED_CONF"
         else
-          printf '\\n[Resolve]\\nDNS=%s\\n' "$DNS_IP" >> "$RESOLVED_CONF"
+          printf '\\n[Resolve]\\nDNS=%s\\n' "$DNS_IP" | $SUDO tee -a "$RESOLVED_CONF" > /dev/null
         fi
 
-        systemctl restart systemd-resolved
+        $SUDO systemctl restart systemd-resolved
 
         # Verify
         VERIFY=$(nslookup example.com 2>&1 | head -5 || true)
@@ -74,17 +76,19 @@ export const configureDnsTool = {
     } else {
       script = `
         set -e
+        SUDO=""
+        [ "$(id -u)" != "0" ] && SUDO="sudo"
         DNS_IP=$(printf '%s' '${b64Ip}' | base64 -d)
 
         # Backup current resolv.conf
         if [ -f /etc/resolv.conf ]; then
-          cp /etc/resolv.conf /etc/resolv.conf.bak
+          $SUDO cp /etc/resolv.conf /etc/resolv.conf.bak
           BACKUP_CONTENT=$(cat /etc/resolv.conf)
         else
           BACKUP_CONTENT=""
         fi
 
-        printf 'nameserver %s\\n' "$DNS_IP" > /etc/resolv.conf
+        printf 'nameserver %s\\n' "$DNS_IP" | $SUDO tee /etc/resolv.conf > /dev/null
 
         # Verify
         VERIFY=$(nslookup example.com 2>&1 | head -5 || true)

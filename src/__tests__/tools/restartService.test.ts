@@ -33,6 +33,9 @@ describe("restartService tool", () => {
     const result = await tool.handler();
     expect(result.content[0].text).toBe("Restarting zapret2...");
     expect(mock.calls[0].command).toContain("zapret2 restart");
+    expect(mock.calls[0].command).toContain('SUDO=""');
+    expect(mock.calls[0].command).toContain('$(id -u)');
+    expect(mock.calls[0].command).toContain('$SUDO');
   });
 
   it("uses fallback text when output is empty", async () => {

@@ -33,6 +33,10 @@ describe("configureDns tool", () => {
     const result = await tool.handler({ resolver: "1.1.1.1", method: "resolv.conf" });
     expect(result.content[0].text).toContain("DNS configured");
     expect(result.content[0].text).toContain("1.1.1.1");
+    expect(mock.calls[0].command).toContain('SUDO=""');
+    expect(mock.calls[0].command).toContain('$(id -u)');
+    expect(mock.calls[0].command).toContain('$SUDO cp /etc/resolv.conf');
+    expect(mock.calls[0].command).toContain('$SUDO tee /etc/resolv.conf');
   });
 
   it("configures DNS via systemd-resolved", async () => {
@@ -40,6 +44,10 @@ describe("configureDns tool", () => {
     const tool = await loadTool();
     const result = await tool.handler({ resolver: "8.8.8.8", method: "systemd-resolved" });
     expect(result.content[0].text).toContain("systemd-resolved");
+    expect(mock.calls[0].command).toContain('SUDO=""');
+    expect(mock.calls[0].command).toContain('$SUDO cp "$RESOLVED_CONF"');
+    expect(mock.calls[0].command).toContain('$SUDO sed -i');
+    expect(mock.calls[0].command).toContain('$SUDO systemctl restart systemd-resolved');
   });
 
   it("rejects custom without customResolver", async () => {

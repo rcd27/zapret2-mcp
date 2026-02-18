@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { getExecutor } from "../executorInstance.js";
 
+// FIXME: отшлёпывает 200 на любой запрос. Выяснить, в чём дело
 export const verifyBypassTool = {
   name: "verifyBypass",
   description: "Verify network connectivity: DNS resolution, HTTP request, and nfqws2 running status for a given domain. Use after startService or restartService to confirm zapret2 is working.",

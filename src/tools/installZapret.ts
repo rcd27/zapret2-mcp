@@ -15,6 +15,8 @@ export const installZapretTool = {
 
     const script = `
       set -e
+      SUDO=""
+      [ "$(id -u)" != "0" ] && SUDO="sudo"
 
       if [ -d "/opt/zapret2/.git" ] && [ "${force}" != "true" ]; then
         echo "ALREADY_INSTALLED"
@@ -23,8 +25,8 @@ export const installZapretTool = {
 
       # Clone repo
       if [ ! -d "/opt/zapret2/.git" ]; then
-        rm -rf /opt/zapret2/*
-        cd /opt && git clone --depth 1 https://github.com/bol-van/zapret2.git zapret2
+        $SUDO rm -rf /opt/zapret2/*
+        cd /opt && $SUDO git clone --depth 1 https://github.com/bol-van/zapret2.git zapret2
       fi
 
       # Download and extract binaries
@@ -33,11 +35,11 @@ export const installZapretTool = {
       curl -sLO "https://github.com/bol-van/zapret2/releases/download/${version}/$ARCHIVE"
       tar xzf "$ARCHIVE"
       EXTRACT_DIR=$(echo "$ARCHIVE" | sed 's/.tar.gz//')
-      cp -r "$EXTRACT_DIR/binaries/"* /opt/zapret2/binaries/
+      $SUDO cp -r "$EXTRACT_DIR/binaries/"* /opt/zapret2/binaries/
       rm -rf "$EXTRACT_DIR" "$ARCHIVE"
 
       # Install binaries
-      cd /opt/zapret2 && sh install_bin.sh
+      cd /opt/zapret2 && $SUDO sh install_bin.sh
 
       # Create base config if missing
       if [ ! -f /opt/zapret2/config ]; then
@@ -52,7 +54,7 @@ export const installZapretTool = {
           "IFACE_WAN=$WAN_IFACE" \
           "IFACE_LAN=" \
           "DISABLE_IPV6=1" \
-          > /opt/zapret2/config
+          | $SUDO tee /opt/zapret2/config > /dev/null
       fi
 
       echo "INSTALL_OK"

@@ -41,6 +41,13 @@ describe("runBlockcheck tool", () => {
     expect(result.content[0].text).toContain("summary");
     expect(result.content[0].text).toContain("zapret2://logs/blockcheck/");
     expect(result.content[0].text).not.toContain("checking example.com");
+    // Verify sudo pattern
+    expect(mock.calls[0].command).toContain('SUDO=""');
+    expect(mock.calls[0].command).toContain('$(id -u)');
+    expect(mock.calls[0].command).toContain('$SUDO /opt/zapret2/blockcheck2.sh');
+    // Verify correct stdin format: domain + ipVersion (not scanLevel)
+    expect(mock.calls[0].command).toContain('printf \'%s\\n\' "example.com" "4"');
+    expect(mock.calls[0].command).not.toContain('"Y"');
   });
 
   it("uses 300s timeout", async () => {

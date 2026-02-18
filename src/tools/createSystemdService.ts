@@ -32,6 +32,8 @@ WantedBy=multi-user.target`;
 
     const script = `
       set -e
+      SUDO=""
+      [ "$(id -u)" != "0" ] && SUDO="sudo"
 
       if ! command -v systemctl >/dev/null 2>&1; then
         echo "ERROR: systemctl not found. This tool requires systemd."
@@ -49,11 +51,11 @@ WantedBy=multi-user.target`;
       fi
 
       # Write unit file
-      printf '%s' '${b64Unit}' | base64 -d > /etc/systemd/system/zapret2.service
+      printf '%s' '${b64Unit}' | base64 -d | $SUDO tee /etc/systemd/system/zapret2.service > /dev/null
 
-      systemctl daemon-reload
+      $SUDO systemctl daemon-reload
 
-      ${enable ? 'systemctl enable zapret2.service' : 'echo "Service not enabled (enable=false)"'}
+      ${enable ? '$SUDO systemctl enable zapret2.service' : 'echo "Service not enabled (enable=false)"'}
 
       echo "UNIT_CREATED"
       echo "Path: /etc/systemd/system/zapret2.service"

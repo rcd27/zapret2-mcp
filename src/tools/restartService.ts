@@ -8,7 +8,9 @@ export const restartServiceTool = {
   schema: z.object({}),
   handler: async () => {
     try {
-      const { stdout, stderr } = await getExecutor().exec("/opt/zapret2/init.d/sysv/zapret2 restart");
+      const { stdout, stderr } = await getExecutor().exec(
+        'SUDO=""; [ "$(id -u)" != "0" ] && SUDO="sudo"; $SUDO /opt/zapret2/init.d/sysv/zapret2 restart'
+      );
       const output = (stdout + stderr).trim() || "Service restarted";
       saveLog("service", output, { action: "restart" });
       return { content: [{ type: "text" as const, text: output }] };
