@@ -21,15 +21,16 @@ describe("prompts", () => {
     await client?.close();
   });
 
-  it("lists all 5 prompts", async () => {
+  it("lists all 6 prompts", async () => {
     const { prompts } = await client.listPrompts();
     const names = prompts.map((p) => p.name);
     expect(names).toContain("setup-zapret");
     expect(names).toContain("find-bypass-strategy");
     expect(names).toContain("troubleshoot");
     expect(names).toContain("setup-desktop");
+    expect(names).toContain("strategy-knowledge");
     expect(names).toContain("overview");
-    expect(prompts.length).toBe(5);
+    expect(prompts.length).toBe(6);
   });
 
   it("setup-zapret returns messages with non-empty text", async () => {

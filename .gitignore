@@ -28,3 +28,6 @@ Thumbs.db
 
 # Dev scripts (local paths)
 inspect_mcp_local.sh
+
+# Internal docs (business confidential)
+docs/
