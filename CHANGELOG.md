@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.3.6] - 2026-03-04
+
+### Added
+- **`runDpiDetector` tool** — запуск Docker-образа `dpi-detector` для диагностики типов DPI-блокировок (TLS SNI, TCP throttling, UDP/QUIC). Тяжёлая операция (~3 мин), полный лог сохраняется в resources. Используется перед `runBlockcheck` для понимания характера блокировки.
+- **Unit-тесты `runDpiDetector`** — 8 тестов: docker flags, log URI, defaults, валидация параметров, пустой вывод, partial output на ошибке, fallback на LocalExecutor из Docker-режима, обработка exec failure.
+- **Новый тип логов `dpi-detector`** — сохранение в `~/.zapret2-mcp/logs/dpi-detector/`, доступ через `zapret2://logs/dpi-detector/{timestamp}`.
+- **Workflow #5 DPI diagnosis** — `runDpiDetector → analyze → runBlockcheck → updateConfig → restartService → verifyBypass`.
+
+### Changed
+- **Промпт `troubleshoot`** — добавлен опциональный шаг 6: запуск `runDpiDetector` для диагностики типов блокировок.
+- **Промпт `overview`** — обновлён: 15 tools, добавлен `runDpiDetector` в секцию инструментов и workflow #5.
+
 ## [0.3.5] - 2026-02-19
 
 ### Added

@@ -20,6 +20,7 @@ import { detectSystemTool } from "./tools/detectSystem.js";
 import { configureDnsTool } from "./tools/configureDns.js";
 import { createSystemdServiceTool } from "./tools/createSystemdService.js";
 import { removeZapretTool } from "./tools/removeZapret.js";
+import { runDpiDetectorTool } from "./tools/runDpiDetector.js";
 import { registerResources } from "./resources.js";
 import { registerPrompts } from "./prompts.js";
 import { setOnLogSaved } from "./logStore.js";
@@ -40,6 +41,7 @@ Key workflows:
 2. Fresh install (desktop): detectSystem → checkPrerequisites → installZapret → configureDns → createSystemdService → updateConfig(NFQWS2_ENABLE=1) → startService → verifyBypass
 3. Find bypass strategy: stopService → runBlockcheck(domain) → read log resource → updateConfig(NFQWS2_OPT=...) → restartService → verifyBypass(domain)
 4. Troubleshoot: detectSystem → getStatus → getConfig → checkPrerequisites → verifyBypass(domain) → analyze
+5. DPI diagnosis: runDpiDetector → analyze blocking types → runBlockcheck(blocked domain) → updateConfig(NFQWS2_OPT) → restartService → verifyBypass
 
 Always start with detectSystem to determine the target environment (OS, init system, WAN interface).
 Use configureDns to set up a reliable DNS resolver.
@@ -67,6 +69,7 @@ const tools = [
   configureDnsTool,
   createSystemdServiceTool,
   removeZapretTool,
+  runDpiDetectorTool,
 ];
 
 for (const tool of tools) {

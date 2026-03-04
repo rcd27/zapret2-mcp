@@ -117,6 +117,8 @@ Gather diagnostic information in this order:
 4. Run checkPrerequisites — verify required tools are present, architecture is supported, network is reachable.
 5. Run verifyBypass — test DNS resolution, HTTP connectivity, and nfqws2 status for the target domain.
 
+6. (Optional) Run runDpiDetector to diagnose specific DPI blocking types (TLS SNI inspection, TCP throttling, etc.).
+
 Analyze the results and report:
 - Is the service running?
 - Are nftables rules loaded?
@@ -288,7 +290,7 @@ Fakes MUST be discarded by the server but processed by the DPI. Fooling options 
             type: "text" as const,
             text: `Give me an overview of zapret2-mcp capabilities.
 
-## Available Tools (13)
+## Available Tools (15)
 
 **System Detection:**
 - detectSystem — Detect OS, architecture, init system, WAN interface, DNS, NFQUEUE module, container status
@@ -308,6 +310,7 @@ Fakes MUST be discarded by the server but processed by the DPI. Fooling options 
 - checkPrerequisites — Verify environment: tools, architecture, network, OS, init system, NFQUEUE
 - installZapret — Full install from scratch: clone, binaries, base config (auto-detects WAN interface)
 - runBlockcheck — Find DPI bypass strategies (~5 min, full log saved to resources)
+- runDpiDetector — Diagnose DPI blocking types via dpi-detector Docker image (~3 min, log saved to resources)
 - verifyBypass — Test if DPI bypass works for a domain
 
 **Desktop Integration:**
@@ -315,7 +318,7 @@ Fakes MUST be discarded by the server but processed by the DPI. Fooling options 
 
 ## Resources
 
-Logs are saved to \`zapret2://logs/{type}/{timestamp}\` where type is blockcheck, service, or config.
+Logs are saved to \`zapret2://logs/{type}/{timestamp}\` where type is blockcheck, service, config, or dpi-detector.
 Use listResources to browse saved logs and read them for historical comparison.
 
 ## Common Workflows
@@ -323,7 +326,8 @@ Use listResources to browse saved logs and read them for historical comparison.
 1. **Fresh install (router):** detectSystem → checkPrerequisites → installZapret → updateConfig(NFQWS2_ENABLE=1) → startService → verifyBypass
 2. **Fresh install (desktop):** detectSystem → checkPrerequisites → installZapret → configureDns → createSystemdService → updateConfig(NFQWS2_ENABLE=1) → startService → verifyBypass
 3. **Find strategy:** stopService → runBlockcheck → read log resource → updateConfig(NFQWS2_OPT) → restartService → verifyBypass
-4. **Troubleshoot:** detectSystem → getStatus → getConfig → checkPrerequisites → verifyBypass → analyze`,
+4. **Troubleshoot:** detectSystem → getStatus → getConfig → checkPrerequisites → verifyBypass → analyze
+5. **DPI diagnosis:** runDpiDetector → analyze blocking types → runBlockcheck(blocked domain) → updateConfig(NFQWS2_OPT) → restartService → verifyBypass`,
           },
         },
       ],

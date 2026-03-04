@@ -2,7 +2,7 @@ import { mkdirSync, writeFileSync, readdirSync, readFileSync, statSync } from "f
 import { join } from "path";
 import { homedir } from "os";
 
-export type LogType = "blockcheck" | "service" | "config";
+export type LogType = "blockcheck" | "service" | "config" | "dpi-detector";
 
 export interface LogEntry {
   type: LogType;
@@ -47,7 +47,7 @@ export function saveLog(type: LogType, content: string, meta?: Record<string, st
 }
 
 export function listLogs(type?: LogType): LogEntry[] {
-  const types: LogType[] = type ? [type] : ["blockcheck", "service", "config"];
+  const types: LogType[] = type ? [type] : ["blockcheck", "service", "config", "dpi-detector"];
   const entries: LogEntry[] = [];
 
   for (const t of types) {

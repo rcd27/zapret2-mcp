@@ -1,7 +1,7 @@
 import { McpServer, ResourceTemplate } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { listLogs, readLog, LogType } from "./logStore.js";
 
-const VALID_TYPES: LogType[] = ["blockcheck", "service", "config"];
+const VALID_TYPES: LogType[] = ["blockcheck", "service", "config", "dpi-detector"];
 
 export function registerResources(server: McpServer): void {
   const template = new ResourceTemplate("zapret2://logs/{type}/{timestamp}", {
