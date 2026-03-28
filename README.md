@@ -3,21 +3,21 @@
 [![CI](https://github.com/rcd27/zapret2-mcp/actions/workflows/ci.yml/badge.svg)](https://github.com/rcd27/zapret2-mcp/actions/workflows/ci.yml)
 [![npm](https://img.shields.io/npm/v/zapret2-mcp)](https://www.npmjs.com/package/zapret2-mcp)
 [![downloads](https://img.shields.io/npm/dm/zapret2-mcp)](https://www.npmjs.com/package/zapret2-mcp)
-[![Knowledge Base](https://img.shields.io/badge/knowledge_base-32_articles-green)](./knowledge/)
+[![Knowledge Base](https://img.shields.io/badge/knowledge_base-35_articles-green)](./knowledge/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
 База знаний по [zapret2](https://github.com/bol-van/zapret2) (DPI bypass) и [blockcheckw](https://github.com/rcd27/blockcheckw) (сканер стратегий). Работает как [MCP-сервер](https://modelcontextprotocol.io/) для LLM-агентов и как обычная документация.
 
-> **Можно использовать без агентов.** [`knowledge/`](./knowledge/) — 32 статьи на русском языке. Открывайте и читайте как обычную документацию, без установки чего-либо.
+> **Можно использовать без агентов.** [`knowledge/`](./knowledge/) — 35 статей на русском языке. Открывайте и читайте как обычную документацию, без установки чего-либо.
 
 ## Что внутри
 
 | Раздел | Статей | Темы |
 |--------|--------|------|
-| [strategies/](./knowledge/strategies/) | 9 | TCP segmentation, fake packets, Lua scripting, QUIC, circular, Discord, Telegram, orchestration |
+| [strategies/](./knowledge/strategies/) | 10 | TCP segmentation, fake packets, Lua scripting, QUIC, circular, Discord, Telegram, orchestration, community production strategies |
 | [config/](./knowledge/config/) | 9 | nfqws2 CLI, zapret2 config, desync profiles, hostlists/ipsets, auto-hostlist, security hardening, UCI, blobs, миграция v1 → v2 |
 | [troubleshooting/](./knowledge/troubleshooting/) | 5 | Smart TV + YouTube, QUIC, IPv6, FLOWOFFLOAD, конфликты с Podkop |
-| [tspu/](./knowledge/tspu/) | 4 | Архитектура ТСПУ, DPI engine, методы блокировки, двухстадийная система |
+| [tspu/](./knowledge/tspu/) | 6 | Архитектура ТСПУ, DPI engine, методы блокировки, двухстадийная система, ночные реконфигурации, юридические риски |
 | [workflows/](./knowledge/workflows/) | 2 | Установка, поиск стратегии |
 | [blockcheckw/](./knowledge/blockcheckw/) | 2 | Overview, команды |
 | [platforms/](./knowledge/platforms/) | 1 | Linux, OpenWrt, Windows, FreeBSD, OpenBSD, Android |
@@ -95,6 +95,7 @@ npm start
 - [zapret2](https://github.com/bol-van/zapret2) — DPI bypass от bol-van
 - [blockcheckw](https://github.com/rcd27/blockcheckw) — быстрый сканер стратегий
 - [tspu-docs](https://github.com/DanielLavrushin/tspu-docs) — документация ТСПУ
+- Academic: [IMC 2022](https://dl.acm.org/doi/10.1145/3517745.3561461), [IMC 2021](https://dl.acm.org/doi/10.1145/3487552.3487858), [NDSS 2020](https://www.ndss-symposium.org/ndss-paper/decentralized-control-a-case-study-of-russia/), [USENIX Security 2023](https://www.usenix.org/conference/usenixsecurity23/presentation/ramesh-network-responses) — рецензированные исследования архитектуры и поведения ТСПУ
 - Community — обезличенные знания из открытых обсуждений
 
 ## Лицензия
