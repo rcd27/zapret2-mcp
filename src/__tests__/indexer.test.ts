@@ -131,6 +131,25 @@ describe("KnowledgeIndex", () => {
     expect(content).toContain("circular");
   });
 
+  // --- P1: context narrowing ---
+
+  it("context deprioritizes already-covered topics", () => {
+    const withoutContext = index.query("youtube не работает");
+    const withContext = index.query("youtube не работает", undefined, "QUIC отключён, curl на роутере OK");
+    // With context mentioning QUIC, QUIC-related docs should rank lower
+    const quicRankWithout = withoutContext.findIndex((r) => r.path.includes("quic"));
+    const quicRankWith = withContext.findIndex((r) => r.path.includes("quic"));
+    if (quicRankWithout >= 0 && quicRankWith >= 0) {
+      expect(quicRankWith).toBeGreaterThanOrEqual(quicRankWithout);
+    }
+  });
+
+  it("context does not break results when empty", () => {
+    const withoutContext = index.query("strategy");
+    const withEmptyContext = index.query("strategy", undefined, "");
+    expect(withEmptyContext.length).toBe(withoutContext.length);
+  });
+
   it("groups multiple chunks from same document", () => {
     const results = index.query("fake multisplit strategy");
     for (const r of results) {

@@ -137,12 +137,16 @@ export class KnowledgeIndex {
     }
   }
 
-  /** Keyword-based search with chunk-level retrieval and intent detection. */
-  query(topic: string, maxTokens?: number): KnowledgeEntry[] {
+  /**
+   * Keyword-based search with chunk-level retrieval, intent detection, and context narrowing.
+   * @param context - what the agent already knows/checked (used to deprioritize already-covered topics)
+   */
+  query(topic: string, maxTokens?: number, context?: string): KnowledgeEntry[] {
     const keywords = this.tokenize(topic);
     if (keywords.length === 0) return this.entries;
 
     const intent = this.detectIntent(keywords);
+    const contextKeywords = context ? this.tokenize(context) : [];
 
     const scoredChunks: { chunk: KnowledgeChunk; score: number }[] = [];
 
@@ -177,6 +181,11 @@ export class KnowledgeIndex {
 
       // Intent boost
       score += this.intentBoost(chunk.docPath, intent);
+
+      // Context narrowing: deprioritize chunks that cover already-known topics
+      if (contextKeywords.length > 0) {
+        score += this.contextAdjust(chunk, contextKeywords);
+      }
 
       if (score > 0) {
         scoredChunks.push({ chunk, score });
@@ -276,6 +285,31 @@ export class KnowledgeIndex {
     }
 
     return bestIntent;
+  }
+
+  /**
+   * Adjust score based on context (what agent already knows).
+   * Chunks heavily overlapping with context get deprioritized.
+   * Chunks that add NEW information relative to context get boosted.
+   */
+  private contextAdjust(chunk: KnowledgeChunk, contextKeywords: string[]): number {
+    const chunkText = (chunk.sectionTitle + " " + chunk.content).toLowerCase();
+    let overlapCount = 0;
+
+    for (const ckw of contextKeywords) {
+      if (chunkText.includes(ckw)) {
+        overlapCount++;
+      }
+    }
+
+    const overlapRatio = contextKeywords.length > 0 ? overlapCount / contextKeywords.length : 0;
+
+    // High overlap (>60% of context keywords found in chunk) → deprioritize
+    if (overlapRatio > 0.6) return -8;
+    // Medium overlap (30-60%) → slight penalty
+    if (overlapRatio > 0.3) return -3;
+    // Low overlap (<30%) → this chunk has new info, slight boost
+    return 2;
   }
 
   private intentBoost(docPath: string, intent: Intent): number {

@@ -42,10 +42,11 @@ server.tool(
   {
     topic: z.string().describe("What to search for (e.g. 'split2 strategy', 'blockcheckw scan', 'troubleshooting dns', 'config nfqws2_opt')"),
     tokens: z.number().optional().describe("Maximum approximate token count for the response (default: 4000). Use 0 for unlimited."),
+    context: z.string().optional().describe("What you already know or checked (e.g. 'curl OK on router, QUIC disabled, flow_offloading_hw=1'). Helps narrow results by deprioritizing already-covered topics."),
   },
   async (args) => {
     const tokenLimit = args.tokens === 0 ? undefined : (args.tokens ?? 4000);
-    const results = index.query(args.topic, tokenLimit);
+    const results = index.query(args.topic, tokenLimit, args.context);
 
     if (results.length === 0) {
       return {
