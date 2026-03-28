@@ -1,10 +1,11 @@
 ---
 title: Fake Packet Strategies
 zapret2-version: v0.9.4.5
-tags: fake, rst, rstack, syndata, fooling, md5sig, badsum, autottl, ttl
-source: official-docs
+tags: fake, rst, rstack, syndata, fooling, md5sig, badsum, autottl, ttl, ip6, extension headers, tcp_ts_up, tcp_nop_del, ip_id, ipfrag2, synhide
+source: deepwiki/bol-van/zapret2, official-docs
 created: 2026-03-25
-updated: 2026-03-25
+updated: 2026-03-28
+revision: 2
 ---
 
 # Fake Packets (инъекция пакетов-обманок)
@@ -81,6 +82,53 @@ Fake-пакеты ОБЯЗАНЫ быть отброшены сервером, �
 ```
 --dpi-desync-fooling=md5sig,badsum
 ```
+
+## Расширенные fooling-параметры (Lua)
+
+В Lua-режиме (`--lua-desync`) доступны дополнительные параметры модификации пакетов.
+
+### IP Layer
+
+| Параметр | Описание |
+|----------|----------|
+| `ip_ttl=N` | Установить IPv4 TTL в значение N |
+| `ip6_ttl=N` | Установить IPv6 hop limit в значение N |
+| `ip_autottl=delta,min-max` | Адаптивный TTL: оценка расстояния по входящим TTL (базы 64, 128, 255), применение delta с ограничениями min-max |
+| `ip_id=seq\|rnd\|zero` | Управление IPv4 Identification: `seq` — инкрементальный, `rnd` — случайный, `zero` — нулевой. Опция `ip_id_conn` привязывает счётчик к соединению |
+
+### IPv6 Extension Headers
+
+Вставка нестандартных заголовков для сбивания stateful DPI:
+
+| Параметр | Заголовок |
+|----------|----------|
+| `ip6_hopbyhop` | Hop-by-Hop Options |
+| `ip6_destopt` | Destination Options |
+| `ip6_routing` | Routing Header |
+| `ip6_ah` | Authentication Header |
+
+Система автоматически вызывает `fix_ip6_next()` для корректной цепочки заголовков.
+
+### TCP Layer
+
+| Параметр | Описание |
+|----------|----------|
+| `tcp_seq=delta` | Сдвиг TCP sequence number (wraparound-safe) |
+| `tcp_ack=delta` | Сдвиг TCP acknowledgment number |
+| `tcp_flags_set=SYN,ACK,...` | Установить TCP-флаги |
+| `tcp_flags_unset=FIN,RST,...` | Сбросить TCP-флаги |
+| `tcp_ts=delta` | Модификация TCP Timestamp option |
+| `tcp_ts_up` | Переместить Timestamp option в начало списка опций (обходит DPI, которые проверяют timestamp только если он первый) |
+| `tcp_nop_del` | Удалить NOP-padding (0x01) из TCP options, освобождая место в 40-байтном пространстве |
+| `tcp_md5[=hexdata]` | Добавить TCP MD5 Signature (Option 19). По умолчанию — 16 нулевых байт |
+
+### Checksum и фрагментация
+
+| Параметр | Описание |
+|----------|----------|
+| `badsum` | Намеренно портит L4 checksum — DPI обрабатывает пакет, стек получателя отбрасывает |
+| `ipfrag2` | Разбивает пакет на 2 IP-фрагмента. TCP: offset 32 байта, UDP: 8 байт. Точка разбиения выравнивается на 8 (требование IP fragmentation) |
+| `ipfrag_disorder` | Отправить второй фрагмент раньше первого для максимального сбоя DPI |
 
 ## Когда использовать
 

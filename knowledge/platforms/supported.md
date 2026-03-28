@@ -1,10 +1,11 @@
 ---
 title: Supported Platforms
 zapret2-version: v0.9.4.5
-tags: platforms, linux, openwrt, wsl2, windows, macos
-source: official-docs
+tags: platforms, linux, openwrt, wsl2, windows, macos, freebsd, openbsd, bsd, dvtws2, winws2, android
+source: deepwiki/bol-van/zapret2, official-docs
 created: 2026-03-25
-updated: 2026-03-25
+updated: 2026-03-28
+revision: 2
 ---
 
 # Поддерживаемые платформы
@@ -30,16 +31,54 @@ Firewall: nftables (предпочтительно) или iptables.
 
 ## Windows
 
-Нативно не поддерживается. Причины:
-- zapret2 использует NFQUEUE (Linux kernel), Windows использует WinDivert
-- Bash-скрипты vs .cmd
-- Пути: `/opt/zapret2` vs `C:\zapret`
+Поддерживается через **winws2** (WinDivert-based). Демон `winws2` — нативный Windows-бинарник.
 
-**Решение:** Использовать через WSL2 (Windows Subsystem for Linux):
-1. Установить WSL2 с Ubuntu/Debian
-2. Установить zapret2 как на обычный Linux
-3. Настроить WSL2 для перехвата трафика хоста
+Особенности:
+- Использует WinDivert вместо NFQUEUE для перехвата пакетов
+- Компилируется со статической линковкой зависимостей (защита от DLL injection)
+- Security: ASLR/DEP (`--nxcompat`, `--high-entropy-va`), dynamic base relocation
+- Sandbox: low integrity level + job object restrictions
+
+**Альтернатива**: WSL2 (Windows Subsystem for Linux) — установить zapret2 как на обычный Linux.
+
+## FreeBSD
+
+Поддерживается через **dvtws2** (DiVerT WorkStation 2). Использует `ipfw` с divert-сокетами.
+
+Особенности:
+- Один divert-сокет обслуживает и IPv4, и IPv6
+- Firewall: `ipfw` с divert-правилами
+- Интерфейс определяется из `sockaddr` после `recvfrom()`
+- Совместим с pfSense/OPNsense через специальные скрипты
+
+```
+# Пример ipfw-правила
+ipfw add divert 989 tcp from any to any 443 out
+```
+
+**Ограничения BSD**: нет фильтрации по payload в firewall, нет per-flow kernel filtering, каждый пакет проходит через userspace.
+
+## OpenBSD
+
+Поддерживается через **dvtws2**. Использует `pf` с `divert-packet`.
+
+Особенности:
+- **Раздельные** divert-сокеты для IPv4 и IPv6 (в отличие от FreeBSD)
+- Firewall: `pf` с правилами `divert-packet`
+- `no state` — чтобы pf не создавал автоматические bidirectional-правила
+
+```
+# Пример pf-правила
+pass out on egress inet proto tcp to port 443 divert-packet port 989 no state
+```
 
 ## macOS
 
-Не поддерживается. macOS не имеет NFQUEUE или аналогичного механизма перехвата пакетов.
+**Не поддерживается.** Apple удалила `ipdivert` из ядра — механизм divert-сокетов недоступен, несмотря на BSD-наследие.
+
+## Android
+
+Поддерживается (Linux-based). Особенности:
+- Обработка отсутствия `/etc/passwd` для privilege dropping
+- Интеграция с `logcat` через `liblog`
+- Преимущественно статическая линковка (ограничения Bionic libc)
