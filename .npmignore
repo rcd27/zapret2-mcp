@@ -11,6 +11,13 @@ coverage/
 # Docker dev environment
 docker/
 
+# Reference submodules (not needed in npm package — knowledge/ has the extracted content)
+reference/
+
+# Release config
+release-please-config.json
+.release-please-manifest.json
+
 # Docs (dev-only)
 docs/
 CLAUDE.md
