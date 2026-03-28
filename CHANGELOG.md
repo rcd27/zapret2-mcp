@@ -1,5 +1,31 @@
 # Changelog
 
+## [0.5.0](https://github.com/rcd27/zapret2-mcp/compare/v0.4.0...v0.5.0) (2026-03-28)
+
+
+### ⚠ BREAKING CHANGES
+
+* **pivot:** CI/CD для автоматического версионирования и деплоя в NPM
+* **pivot:** переход в парадигму knowledge-base
+
+### Features
+
+* add removeZapret2 tool with unit tests ([b75a26e](https://github.com/rcd27/zapret2-mcp/commit/b75a26e6c2e97205764c4b729acf5362b6b6c8b6))
+* add runDpiDetector tool for DPI blocking diagnosis ([76a24c7](https://github.com/rcd27/zapret2-mcp/commit/76a24c77510790ad7adadbd08ea4ca4a911e3fea))
+* **pivot:** CI/CD для автоматического версионирования и деплоя в NPM ([326bf6c](https://github.com/rcd27/zapret2-mcp/commit/326bf6c97c616ada5278e6ae14c220a378126c15))
+* **pivot:** переход в парадигму knowledge-base ([1d53b78](https://github.com/rcd27/zapret2-mcp/commit/1d53b7842f781f0075e2682d1e97148619de986b))
+* **prompts:** add strategy-knowledge prompt ([ef01999](https://github.com/rcd27/zapret2-mcp/commit/ef0199970504599163a3730f597c1bb203facb9a))
+* **verifyBypass:** add interface param, routeTo/wanInterface fields, fix bypassConfirmed logic ([4f44a18](https://github.com/rcd27/zapret2-mcp/commit/4f44a18666026ea5aaa3e4c35bad51c20d587993))
+* zapret2-mcp v0.3.0 ([9ee87f9](https://github.com/rcd27/zapret2-mcp/commit/9ee87f99338f7c028dd80b661029bf01a2d44d06))
+
+
+### Bug Fixes
+
+* critical workflow bugs from user-story testing (v0.3.1) ([a370abc](https://github.com/rcd27/zapret2-mcp/commit/a370abc22c7365efc9f908b29e4ad8c52383ad33))
+* installZapret clone permissions and runBlockcheck stdin format ([ba09230](https://github.com/rcd27/zapret2-mcp/commit/ba09230a7d2f539f8ae3802987b203a26cf952c7))
+* **local:** sudo for `local` installation ([7e75130](https://github.com/rcd27/zapret2-mcp/commit/7e7513049fc520623346d0b33cbdd5db3e8e204d))
+* resolve 10 bugs found during full-cycle reinstall testing (v0.3.3) ([f891829](https://github.com/rcd27/zapret2-mcp/commit/f891829b36c4a4d2cdcbfdb966dd25cbae1df77f))
+
 ## [0.3.6] - 2026-03-04
 
 ### Added
