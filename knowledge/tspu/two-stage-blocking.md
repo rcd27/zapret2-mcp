@@ -1,9 +1,9 @@
 ---
 title: TSPU Two-Stage Blocking Process
 tags: tspu, blocking, two-stage, spfs, csu, protocol lists, timing
-source: official-docs
+source: github/DanielLavrushin/tspu-docs
 created: 2026-03-25
-updated: 2026-03-25
+updated: 2026-03-28
 ---
 
 # Двухстадийная блокировка ТСПУ

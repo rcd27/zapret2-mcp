@@ -6,4 +6,4 @@
 	url = https://github.com/rcd27/blockcheckw.git
 [submodule "reference/tspu-docs"]
 	path = reference/tspu-docs
-	url = https://github.com/rcd27/tspu-docs.git
+	url = https://github.com/DanielLavrushin/tspu-docs.git

@@ -1,9 +1,9 @@
 ---
 title: TSPU DPI Engine — How Protocols Are Recognized
 tags: tspu, dpi, engine, recognition, protocols, analysis, signatures, obfuscation
-source: official-docs
+source: github/DanielLavrushin/tspu-docs
 created: 2026-03-25
-updated: 2026-03-25
+updated: 2026-03-28
 ---
 
 # DPI Engine ТСПУ — как распознаются протоколы
