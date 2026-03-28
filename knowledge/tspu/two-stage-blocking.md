@@ -1,12 +1,14 @@
 ---
 title: TSPU Two-Stage Blocking Process
 tags: tspu, blocking, two-stage, spfs, csu, protocol lists, timing
-source: github/DanielLavrushin/tspu-docs
+source: github/DanielLavrushin/tspu-docs, community
 created: 2026-03-25
-updated: 2026-03-28
+updated: 2026-03-29
 ---
 
 # Двухстадийная блокировка ТСПУ
+
+**Примечание:** Описание двухстадийного процесса основано на утёкших документах и community-анализе (github/DanielLavrushin/tspu-docs). Академические исследования (IMC 2022) описывают ТСПУ как единую систему и не разделяют на тип А/Б. Внутренняя архитектура не противоречит внешним наблюдениям, но не верифицирована независимо.
 
 ТСПУ не блокирует протоколы мгновенно. Процесс блокировки состоит из двух стадий с задержкой 5-15 минут.
 
