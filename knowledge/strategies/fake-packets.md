@@ -4,8 +4,8 @@ zapret2-version: v0.9.4.5
 tags: fake, rst, rstack, syndata, fooling, md5sig, badsum, autottl, ttl, ip6, extension headers, tcp_ts_up, tcp_nop_del, ip_id, ipfrag2, synhide
 source: deepwiki/bol-van/zapret2, official-docs
 created: 2026-03-25
-updated: 2026-03-28
-revision: 2
+updated: 2026-03-29
+revision: 3
 ---
 
 # Fake Packets (инъекция пакетов-обманок)
@@ -22,6 +22,42 @@ revision: 2
 
 ### syndata
 Отправляет данные в SYN-пакете (нестандартное поведение). Сбивает некоторые DPI.
+
+### fakeddisorder
+Комбинация fake + disorder в одном действии. Отправляет fake-пакет и переупорядочивает сегменты:
+```
+--lua-desync=fakeddisorder:pos=method+2:tcp_md5
+--lua-desync=fakeddisorder:pos=10,midsld:seqovl=336:seqovl_pattern=blob_tls_clienthello_www_google_com:badsum
+```
+
+### tls_client_hello_clone
+Клонирует реальный TLS ClientHello в blob для использования как fake. Создаёт максимально правдоподобный fake, т.к. он основан на реальном пакете:
+```
+--lua-desync=tls_client_hello_clone:blob=cloned_tls:fallback=fake_default_tls
+--lua-desync=fake:blob=cloned_tls:optional:tcp_seq=10000000:tls_mod=rnd,dupsid,sni=fonts.google.com
+```
+Параметры:
+- `blob=<name>` — имя для сохранения клона
+- `fallback=<blob>` — fallback blob, если клонирование не удалось
+
+### hostfakesplit
+Split с fake на уровне hostname. Позволяет указать конкретный хост для fake-части:
+```
+--lua-desync=hostfakesplit:host=ozon.ru:midhost=host-2:seqovl=sniext+3:seqovl_pattern=tls_clienthello:badsum:tcp_md5:tcp_ts_up
+--lua-desync=hostfakesplit:host=google.com:tcp_ts=-600000
+```
+Параметры:
+- `host=<domain>` — домен для fake-части
+- `midhost=<pos>` — позиция разделения внутри hostname (`midsld`, `host-2` и т.д.)
+- `altorder=1` — альтернативный порядок отправки сегментов
+- `disorder_after` — переупорядочить после split
+
+### pktmod
+Модификация пакета без отправки fake. Используется для изменения параметров реальных пакетов:
+```
+--lua-desync=pktmod:ip_ttl=1
+```
+Часто используется в паре с fake в circular-стратегиях для TTL-перебора.
 
 ## Параметры fake-пакетов
 
@@ -40,8 +76,11 @@ Lua-формат:
 - `blob=<payload>` — binary payload для fake
 - `tcp_md5` — добавить MD5 signature (fooling)
 - `tcp_seq=<offset>` — смещение TCP sequence
-- `tls_mod=<mods>` — модификации TLS: `rnd`, `rndsni`, `sni=<str>`, `dupsid`, `padencap`
+- `tls_mod=<mods>` — модификации TLS: `rnd`, `rndsni`, `sni=<str>`, `dupsid`, `padencap`, `none`
 - `repeats=<N>` — количество повторений fake-пакета
+- `tcp_ack=<delta>` — сдвиг TCP acknowledgment number (например `-66000`)
+- `optional` — не считать ошибкой, если blob не найден
+- `nodrop` — не дропать оригинальный пакет (для multisplit с blob)
 
 ## Fooling (маскировка fakes)
 

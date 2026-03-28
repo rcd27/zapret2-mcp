@@ -4,7 +4,7 @@ zapret2-version: v0.9.4.5
 tags: circular-strategy, rotation, resilience, multi-strategy, profiles, autohostlist
 source: official-docs
 created: 2026-03-25
-updated: 2026-03-28
+updated: 2026-03-29
 ---
 
 # Оркестрация стратегий
@@ -22,8 +22,21 @@ Circular — автоматическая ротация между нескол
 Параметры:
 - `fails=N` — порог неудач для смены стратегии (по умолчанию 2)
 - `maxtime=N` — временное окно в секундах (по умолчанию 60)
+- `time=N` — альтернативное имя для `maxtime`
+- `retrans=N` — количество ретрансмиссий до считывания неудачи
+- `nld=N` — количество записей в NLD (network latency detection)
 
 **Важно:** параметры circular должны быть без пробелов между стратегиями.
+
+### Маркер `:final`
+
+Последняя стратегия в circular-цепочке должна быть помечена `:final`:
+
+```
+--lua-desync=multisplit:pos=1,midsld:strategy=3:final
+```
+
+После достижения последней стратегии circular начинает цикл заново с strategy=1.
 
 ### Привязка стратегий к circular
 
@@ -72,9 +85,19 @@ nfqws2 \
 
 ### Range-параметры в circular
 
-- `--out-range=-s34228` — обрабатывать исходящие пакеты до ~25 TCP-пакетов (по TCP sequence)
-- `--in-range=-s5556` — обрабатывать входящие пакеты до ~5 TCP-пакетов
-- `--in-range=x` — отключить обработку входящих (после circular-директивы)
+- `--out-range=-s34228` — обрабатывать исходящие пакеты до ~25 TCP-пакетов (по TCP sequence). Достаточно для полного TLS ClientHello включая большие (YouTube)
+- `--in-range=-s5556` — обрабатывать входящие пакеты до ~5 TCP-пакетов. Используется circular для детекции сбоев (отсутствие Server Hello = неудача)
+- `--in-range=x` — отключить обработку входящих для desync-действий (ставится после circular-директивы, чтобы desync-действия не реагировали на входящие пакеты)
+
+### pktmod в circular
+
+`pktmod` — специальное действие для модификации пакета без desync. Используется в паре с TTL-перебором:
+
+```
+--lua-desync=fake:blob=fake_default_tls:ip_ttl=3:repeats=1 --payload=empty --out-range=s1<d1 --lua-desync=pktmod:ip_ttl=1:strategy=2
+```
+
+Логика: fake отправляется с TTL=3 (умрёт после 3 хопов), затем `pktmod` уменьшает TTL реальных пакетов до 1 для out-range условия `s1<d1` (первый пакет после fake).
 
 ## Multi-profile конфигурация
 
