@@ -3,6 +3,8 @@ title: Конфликты zapret2 с другим ПО на OpenWrt
 zapret2-version: v0.9.4.5
 tags: troubleshooting, openwrt, flowoffload, podkop, zeroblock, nft, firewall, conflicts
 source: telegram/@itdogchat, telegram/@routerich, community
+created: 2026-03-28
+updated: 2026-03-28
 ---
 
 # Конфликты zapret2 с другим ПО на OpenWrt

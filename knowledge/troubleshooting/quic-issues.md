@@ -3,6 +3,8 @@ title: QUIC-проблемы — почему YouTube тормозит и как
 zapret2-version: v0.9.4.5
 tags: troubleshooting, quic, udp, youtube, performance, disable-quic, podkop, browser
 source: telegram/@itdogchat, telegram/@routerich, community
+created: 2026-03-28
+updated: 2026-03-28
 ---
 
 # QUIC: главный незаметный враг YouTube на роутере

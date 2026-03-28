@@ -2,6 +2,9 @@
 title: Fake Packet Strategies
 zapret2-version: v0.9.4.5
 tags: fake, rst, rstack, syndata, fooling, md5sig, badsum, autottl, ttl
+source: official-docs
+created: 2026-03-25
+updated: 2026-03-25
 ---
 
 # Fake Packets (инъекция пакетов-обманок)

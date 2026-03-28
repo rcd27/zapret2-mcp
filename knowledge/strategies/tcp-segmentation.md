@@ -2,6 +2,9 @@
 title: TCP Segmentation Strategies
 zapret2-version: v0.9.4.5
 tags: split2, disorder2, multisplit, multidisorder, fakedsplit, fakeddisorder, hostfakesplit, segmentation
+source: official-docs
+created: 2026-03-25
+updated: 2026-03-25
 ---
 
 # TCP Segmentation (разбиение исходящих пакетов)

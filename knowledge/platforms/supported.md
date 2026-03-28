@@ -2,6 +2,9 @@
 title: Supported Platforms
 zapret2-version: v0.9.4.5
 tags: platforms, linux, openwrt, wsl2, windows, macos
+source: official-docs
+created: 2026-03-25
+updated: 2026-03-25
 ---
 
 # Поддерживаемые платформы

@@ -2,6 +2,9 @@
 title: HTTP-Specific Strategies
 zapret2-version: v0.9.4.5
 tags: hostcase, domcase, methodeol, http, host header
+source: official-docs
+created: 2026-03-25
+updated: 2026-03-25
 ---
 
 # HTTP-специфичные стратегии

@@ -2,6 +2,9 @@
 title: DPI Types and Recommended Approaches
 zapret2-version: v0.9.4.5
 tags: dpi, domain-based, stateful, stateless, recommendations
+source: official-docs
+created: 2026-03-25
+updated: 2026-03-25
 ---
 
 # Типы DPI и рекомендуемые подходы
