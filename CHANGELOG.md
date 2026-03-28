@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.7.0](https://github.com/rcd27/zapret2-mcp/compare/v0.6.1...v0.7.0) (2026-03-28)
+
+
+### ⚠ BREAKING CHANGES
+
+* **retrival:** техника чанков для retrieve логики, чтобы ИИ агенту не жечь токены
+
+### Features
+
+* **retrival:** добавлен context для более точного ранжирования чанков ([568e10d](https://github.com/rcd27/zapret2-mcp/commit/568e10dcadf36ca24a4984988fc3398eb171c906))
+* **retrival:** техника чанков для retrieve логики, чтобы ИИ агенту не жечь токены ([e00cd32](https://github.com/rcd27/zapret2-mcp/commit/e00cd32ec82d6dd7cd89c57246524d810d12edf6))
+
 ## [0.6.1](https://github.com/rcd27/zapret2-mcp/compare/v0.6.0...v0.6.1) (2026-03-28)
 
 
