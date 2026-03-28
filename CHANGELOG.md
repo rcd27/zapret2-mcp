@@ -1,5 +1,16 @@
 # Changelog
 
+## [0.5.2](https://github.com/rcd27/zapret2-mcp/compare/v0.5.1...v0.5.2) (2026-03-28)
+
+
+### Features
+
+* **knowledge:** добавлены доки про ТСПУ ([23f6b12](https://github.com/rcd27/zapret2-mcp/commit/23f6b12cd560f70ad529e0d4bfe150cfe8b0033b))
+* **knowledge:** конфликты на OpenWRT ([20df465](https://github.com/rcd27/zapret2-mcp/commit/20df4651cbc310bb57ba5528a826d12d676a21c6))
+* **knowledge:** миграции стратегий V1 -&gt; V2 ([b9da20f](https://github.com/rcd27/zapret2-mcp/commit/b9da20f8da675da536555d9efa6bd5122032f03c))
+* **knowledge:** проблемы с QUICK ([b41ed68](https://github.com/rcd27/zapret2-mcp/commit/b41ed68db85fa1700502e172f5bc7b5e2440f1fc))
+* **knowledge:** статья про смарт-тв ([a04cb01](https://github.com/rcd27/zapret2-mcp/commit/a04cb01b5f92dba14e7da3b69674b41bc5f7c67e))
+
 ## [0.5.1](https://github.com/rcd27/zapret2-mcp/compare/v0.5.0...v0.5.1) (2026-03-28)
 
 
