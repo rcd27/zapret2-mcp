@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.7.2](https://github.com/rcd27/zapret2-mcp/compare/v0.7.1...v0.7.2) (2026-03-28)
+
+
+### Features
+
+* **knowledge:** ряд статей и правок, согласно опыту community ([e7769c0](https://github.com/rcd27/zapret2-mcp/commit/e7769c0cadc372e679c3bf5dff2e234069629e41))
+* **knowledge:** стратегии сообщества + данные по ночным перезагрузкам + правки ([2173d3b](https://github.com/rcd27/zapret2-mcp/commit/2173d3bc39711cc1ee2bdf779effff6d6ffd8a5c))
+
 ## [0.7.1](https://github.com/rcd27/zapret2-mcp/compare/v0.7.0...v0.7.1) (2026-03-28)
 
 
