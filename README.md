@@ -1,19 +1,22 @@
 # zapret2-mcp
 
-MCP-сервер для управления [zapret2](https://github.com/bol-van/zapret2) — инструментом обработки сетевых пакетов. Позволяет AI-агентам автоматизировать установку, настройку и диагностику zapret2 через [Model Context Protocol](https://modelcontextprotocol.io/).
+Knowledge MCP-сервер для [zapret2](https://github.com/bol-van/zapret2) и [blockcheckw](https://github.com/rcd27/blockcheckw). Подключи к AI-агенту — он получит экспертные знания по обходу DPI-блокировок и сможет настроить всё сам.
 
-## Поддерживаемые платформы
+## Зачем
 
-| Платформа | Статус | Транспорт |
-|---|---|---|
-| OpenWrt (роутер) | Полная поддержка | `ssh` |
-| Linux (десктоп/сервер) | Полная поддержка | `local` |
-| Docker (разработка/тестирование) | Полная поддержка | `docker` |
-| macOS | Не поддерживается | — |
-| Windows (нативно) | Не поддерживается | — |
-| Windows (WSL2) | Работает через `local` | `local` |
+AI-агент (Claude, Cursor, etc.) умеет выполнять команды в терминале. Но он **не знает** как работает zapret2, какие стратегии бывают, как их подбирать и что делать если не работает. Этот MCP-сервер даёт агенту эти знания.
 
-zapret2 поддерживает Windows нативно через [zapret-win-bundle](https://github.com/bol-van/zapret-win-bundle), но архитектура (WinDivert, `.cmd`-скрипты, другие пути) полностью отличается от Linux. Наш MCP-сервер работает только с Linux/OpenWrt-окружениями. Подробнее: [docs/windows-support.md](docs/windows-support.md).
+**Сервер не выполняет команды** — он отдаёт документацию и экспертизу. Агент читает и действует сам.
+
+## Что внутри
+
+**14 статей** в базе знаний:
+
+- Стратегии DPI bypass: split2, disorder2, fake, fooling, QUIC, оркестрация
+- Справочник параметров nfqws2 и конфига zapret2
+- Команды [blockcheckw](https://github.com/rcd27/blockcheckw) для параллельного сканирования стратегий
+- Пошаговые workflow-ы установки и диагностики
+- Типичные проблемы и решения
 
 ## Установка
 
@@ -21,217 +24,67 @@ zapret2 поддерживает Windows нативно через [zapret-win-b
 npm install -g zapret2-mcp
 ```
 
-Или запуск без установки:
+## Подключение
 
-```bash
-npx zapret2-mcp
-```
-
-## Настройка MCP-клиента
-
-### Claude Desktop
-
-Добавить в `~/.claude/claude_desktop_config.json`:
+### Claude Desktop / Claude Code
 
 ```json
 {
   "mcpServers": {
     "zapret2": {
       "command": "npx",
-      "args": ["zapret2-mcp"],
-      "env": {
-        "ZAPRET2_MODE": "ssh",
-        "ZAPRET2_SSH_HOST": "192.168.1.1"
-      }
+      "args": ["zapret2-mcp"]
     }
   }
 }
 ```
 
-### Claude Code
+Никаких переменных окружения не нужно — сервер только отдаёт знания.
 
-Добавить в `.mcp.json` в корне проекта или в `~/.claude/mcp.json` глобально:
+## MCP API
 
-```json
-{
-  "mcpServers": {
-    "zapret2": {
-      "command": "npx",
-      "args": ["zapret2-mcp"],
-      "env": {
-        "ZAPRET2_MODE": "ssh",
-        "ZAPRET2_SSH_HOST": "192.168.1.1"
-      }
-    }
-  }
-}
-```
-
-### Cursor
-
-Добавить в настройки MCP:
-
-```json
-{
-  "zapret2": {
-    "command": "npx",
-    "args": ["zapret2-mcp"],
-    "env": {
-      "ZAPRET2_MODE": "docker"
-    }
-  }
-}
-```
-
-## Режимы транспорта
-
-Сервер выполняет команды на целевой машине через один из трёх транспортов.
-
-### `ssh` — удалённый роутер (продакшн)
-
-Подключение по SSH к OpenWrt-роутеру. Основной режим для реального использования.
-
-```json
-{ "ZAPRET2_MODE": "ssh", "ZAPRET2_SSH_HOST": "192.168.1.1" }
-```
-
-### `local` — локальная машина
-
-Выполнение команд через `bash -c` на той же машине, где запущен MCP-сервер. Для Linux-десктопов и WSL2.
-
-```json
-{ "ZAPRET2_MODE": "local" }
-```
-
-### `docker` — контейнер (по умолчанию)
-
-Выполнение через `docker exec` в контейнере с OpenWrt. Для разработки и тестирования.
-
-```json
-{ "ZAPRET2_MODE": "docker" }
-```
-
-### Переменные окружения
-
-| Переменная | По умолчанию | Описание |
-|---|---|---|
-| `ZAPRET2_MODE` | `docker` | Транспорт: `local`, `docker`, `ssh` |
-| `ZAPRET2_CONTAINER_NAME` | `zapret2-openwrt` | Имя контейнера (режим docker) |
-| `ZAPRET2_SSH_HOST` | — (обязательно для ssh) | SSH-хост |
-| `ZAPRET2_SSH_USER` | `root` | SSH-пользователь |
-| `ZAPRET2_SSH_KEY` | — (опционально) | Путь к SSH-ключу |
-| `ZAPRET2_SSH_PORT` | `22` | SSH-порт |
-
-## Tools (13)
-
-### Определение системы
+### Tool
 
 | Tool | Описание |
 |---|---|
-| `detectSystem` | Определение окружения: ОС, архитектура, init-система, WAN-интерфейс, DNS, NFQUEUE, контейнер |
+| `query-zapret-knowledge` | Поиск по базе знаний. Параметры: `topic` (строка), `tokens` (лимит, опционально) |
 
-### Управление сервисом
+```
+query-zapret-knowledge({ topic: "split2 strategy" })
+query-zapret-knowledge({ topic: "blockcheckw scan", tokens: 2000 })
+query-zapret-knowledge({ topic: "troubleshooting dns" })
+```
 
-| Tool | Описание |
-|---|---|
-| `getStatus` | Статус сервиса: запущен ли, PID, количество nftables-правил, флаг enabled |
-| `startService` | Запуск zapret2 (логи сохраняются в resources) |
-| `stopService` | Остановка zapret2 (логи сохраняются в resources) |
-| `restartService` | Перезапуск zapret2 (логи сохраняются в resources) |
-
-### Конфигурация
-
-| Tool | Описание |
-|---|---|
-| `getConfig` | Чтение конфига zapret2 (целиком или по ключу) |
-| `updateConfig` | Обновление параметра конфига (key=value, снапшот сохраняется в resources) |
-| `configureDns` | Настройка DNS-резолвера (resolv.conf или systemd-resolved) |
-
-### Установка и диагностика
-
-| Tool | Описание |
-|---|---|
-| `checkPrerequisites` | Проверка окружения: инструменты, ОС, init-система, NFQUEUE, сеть |
-| `installZapret` | Полная установка: клонирование, скачивание бинарников, базовый конфиг |
-| `runBlockcheck` | Запуск blockcheck2.sh для поиска рабочих сетевых стратегий (~5 мин, лог в resources) |
-| `verifyBypass` | Проверка сетевой связности: DNS, HTTP, статус nfqws2 |
-
-### Интеграция с десктопом
-
-| Tool | Описание |
-|---|---|
-| `createSystemdService` | Создание systemd unit для автозапуска zapret2 на Linux-десктопе |
-
-## Prompts (5)
-
-MCP-промпты — пошаговые инструкции для типичных сценариев:
+### Prompts
 
 | Prompt | Описание |
 |---|---|
-| `setup-zapret` | Установка с нуля (универсальная) |
-| `setup-desktop` | Установка на Linux-десктоп с systemd, DNS и автозапуском |
-| `find-bypass-strategy` | Поиск рабочей сетевой стратегии через blockcheck |
+| `setup-zapret` | Пошаговая установка zapret2 |
+| `find-bypass-strategy` | Поиск рабочей стратегии через blockcheckw |
 | `troubleshoot` | Диагностика проблем |
-| `overview` | Справочник по всем tools, resources и workflows |
+| `strategy-knowledge` | Полный справочник стратегий DPI bypass |
 
-## MCP Resources
+## Пример использования
 
-Tools сохраняют вывод в файлы для персистентной истории. Агент может возвращаться к предыдущим результатам и сравнивать прогоны.
+> "Настрой zapret2 на моём роутере, найди рабочую стратегию для youtube.com"
 
-- **URI:** `zapret2://logs/{type}/{timestamp}`
-- **Типы логов:** `blockcheck`, `service`, `config`
-- **Хранение:** `~/.zapret2-mcp/logs/`
-
-## Сценарии использования
-
-### Роутер (OpenWrt по SSH)
-
-```
-detectSystem → checkPrerequisites → installZapret → updateConfig(NFQWS2_ENABLE=1)
-→ startService → verifyBypass
-```
-
-### Linux-десктоп
-
-```
-detectSystem → checkPrerequisites → installZapret → configureDns
-→ createSystemdService → updateConfig(NFQWS2_ENABLE=1) → startService → verifyBypass
-```
-
-### Поиск сетевой стратегии
-
-```
-stopService → runBlockcheck(domain) → прочитать лог resource
-→ updateConfig(NFQWS2_OPT=...) → restartService → verifyBypass(domain)
-```
-
-### Диагностика
-
-```
-detectSystem → getStatus → getConfig → checkPrerequisites → verifyBypass(domain)
-→ анализ результатов
-```
+Агент:
+1. Вызывает `query-zapret-knowledge({ topic: "setup installation" })` — получает инструкции
+2. Выполняет команды установки в терминале
+3. Вызывает `query-zapret-knowledge({ topic: "blockcheckw scan" })` — узнаёт как искать стратегии
+4. Запускает `blockcheckw scan -d youtube.com`
+5. Вызывает `query-zapret-knowledge({ topic: "strategy selection criteria" })` — понимает как выбрать лучшую
+6. Применяет стратегию в конфиг, запускает сервис
 
 ## Разработка
 
 ```bash
-git clone https://github.com/your-org/zapret2-mcp.git
+git clone --recurse-submodules https://github.com/rcd27/zapret2-mcp.git
 cd zapret2-mcp
 npm install
-npm run build      # TypeScript → build/
-npm run dev        # MCP Inspector
-npm test           # Unit-тесты (vitest)
-npm run test:integration  # Интеграционные тесты (требуется Docker)
+npm run build
+npm test
 ```
-
-### Docker-окружение для разработки
-
-```bash
-cd docker
-docker compose build && docker compose up -d
-```
-
-Контейнер `zapret2-openwrt`: OpenWrt SNAPSHOT, `privileged: true`, `network_mode: host`.
 
 ## Лицензия
 
