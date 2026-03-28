@@ -1,90 +1,99 @@
 # zapret2-mcp
 
-Knowledge MCP-сервер для [zapret2](https://github.com/bol-van/zapret2) и [blockcheckw](https://github.com/rcd27/blockcheckw). Подключи к AI-агенту — он получит экспертные знания по обходу DPI-блокировок и сможет настроить всё сам.
+[![CI](https://github.com/rcd27/zapret2-mcp/actions/workflows/ci.yml/badge.svg)](https://github.com/rcd27/zapret2-mcp/actions/workflows/ci.yml)
+[![npm](https://img.shields.io/npm/v/zapret2-mcp)](https://www.npmjs.com/package/zapret2-mcp)
+[![Knowledge Base](https://img.shields.io/badge/knowledge_base-27_articles-green)](./knowledge/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
-## Зачем
+База знаний по [zapret2](https://github.com/bol-van/zapret2) (DPI bypass) и [blockcheckw](https://github.com/rcd27/blockcheckw) (сканер стратегий). Работает как [MCP-сервер](https://modelcontextprotocol.io/) для LLM-агентов и как обычная документация.
 
-AI-агент (Claude, Cursor, etc.) умеет выполнять команды в терминале. Но он **не знает** как работает zapret2, какие стратегии бывают, как их подбирать и что делать если не работает. Этот MCP-сервер даёт агенту эти знания.
-
-**Сервер не выполняет команды** — он отдаёт документацию и экспертизу. Агент читает и действует сам.
+> **Можно использовать без агентов.** [`knowledge/`](./knowledge/) — 27 статей на русском языке. Открывайте и читайте как обычную документацию, без установки чего-либо.
 
 ## Что внутри
 
-**14 статей** в базе знаний:
+| Раздел | Статей | Темы |
+|--------|--------|------|
+| [strategies/](./knowledge/strategies/) | 8 | TCP segmentation, fake packets, multidisorder, QUIC, circular, Discord, Telegram, orchestration |
+| [config/](./knowledge/config/) | 5 | nfqws2 CLI, zapret2 config, UCI, blobs, миграция v1 → v2 |
+| [troubleshooting/](./knowledge/troubleshooting/) | 5 | Smart TV + YouTube, QUIC, IPv6, FLOWOFFLOAD, конфликты с Podkop |
+| [tspu/](./knowledge/tspu/) | 4 | Архитектура ТСПУ, DPI engine, методы блокировки, двухстадийная система |
+| [workflows/](./knowledge/workflows/) | 2 | Установка, поиск стратегии |
+| [blockcheckw/](./knowledge/blockcheckw/) | 2 | Overview, команды |
+| [platforms/](./knowledge/platforms/) | 1 | Поддерживаемые платформы |
 
-- Стратегии DPI bypass: split2, disorder2, fake, fooling, QUIC, оркестрация
-- Справочник параметров nfqws2 и конфига zapret2
-- Команды [blockcheckw](https://github.com/rcd27/blockcheckw) для параллельного сканирования стратегий
-- Пошаговые workflow-ы установки и диагностики
-- Типичные проблемы и решения
+## Подключение к LLM-агенту
 
-## Установка
+Сервер **не выполняет команды** — он отдаёт знания. Агент читает и действует сам.
 
-```bash
-npm install -g zapret2-mcp
-```
-
-## Подключение
-
-### Claude Desktop / Claude Code
+### Claude Code / Claude Desktop
 
 ```json
 {
   "mcpServers": {
     "zapret2": {
       "command": "npx",
-      "args": ["zapret2-mcp"]
+      "args": ["-y", "zapret2-mcp"]
     }
   }
 }
 ```
 
-Никаких переменных окружения не нужно — сервер только отдаёт знания.
+### Cursor
+
+Settings → MCP Servers → Add:
+
+```json
+{
+  "zapret2": {
+    "command": "npx",
+    "args": ["-y", "zapret2-mcp"]
+  }
+}
+```
+
+### Из исходников
+
+```bash
+git clone --recurse-submodules https://github.com/rcd27/zapret2-mcp.git
+cd zapret2-mcp
+npm install && npm run build
+npm start
+```
 
 ## MCP API
 
 ### Tool
 
 | Tool | Описание |
-|---|---|
-| `query-zapret-knowledge` | Поиск по базе знаний. Параметры: `topic` (строка), `tokens` (лимит, опционально) |
-
-```
-query-zapret-knowledge({ topic: "split2 strategy" })
-query-zapret-knowledge({ topic: "blockcheckw scan", tokens: 2000 })
-query-zapret-knowledge({ topic: "troubleshooting dns" })
-```
+|------|----------|
+| `query-zapret-knowledge(topic, tokens?)` | Keyword-поиск по базе знаний с ранжированием |
 
 ### Prompts
 
 | Prompt | Описание |
-|---|---|
+|--------|----------|
 | `setup-zapret` | Пошаговая установка zapret2 |
-| `find-bypass-strategy` | Поиск рабочей стратегии через blockcheckw |
+| `find-bypass-strategy` | Поиск стратегии через blockcheckw |
 | `troubleshoot` | Диагностика проблем |
-| `strategy-knowledge` | Полный справочник стратегий DPI bypass |
+| `strategy-knowledge` | Справочник стратегий DPI bypass |
 
-## Пример использования
+## Примеры вопросов
 
-> "Настрой zapret2 на моём роутере, найди рабочую стратегию для youtube.com"
-
-Агент:
-1. Вызывает `query-zapret-knowledge({ topic: "setup installation" })` — получает инструкции
-2. Выполняет команды установки в терминале
-3. Вызывает `query-zapret-knowledge({ topic: "blockcheckw scan" })` — узнаёт как искать стратегии
-4. Запускает `blockcheckw scan -d youtube.com`
-5. Вызывает `query-zapret-knowledge({ topic: "strategy selection criteria" })` — понимает как выбрать лучшую
-6. Применяет стратегию в конфиг, запускает сервис
-
-## Разработка
-
-```bash
-git clone --recurse-submodules https://github.com/rcd27/zapret2-mcp.git
-cd zapret2-mcp
-npm install
-npm run build
-npm test
 ```
+"YouTube тормозит на Samsung TV — что делать?"
+"Как настроить голос Discord через zapret2?"
+"blockcheck нашёл стратегию, но сайт не открывается"
+"Как перевести стратегию с zapret v1 на zapret2?"
+"Что такое circular и как настроить автоперебор?"
+"QUIC — отключать или обрабатывать?"
+```
+
+## Источники
+
+- [zapret2](https://github.com/bol-van/zapret2) — DPI bypass от bol-van
+- [blockcheckw](https://github.com/rcd27/blockcheckw) — быстрый сканер стратегий
+- [tspu-docs](https://github.com/DanielLavrushin/tspu-docs) — документация ТСПУ
+- Community — обезличенные знания из открытых обсуждений
 
 ## Лицензия
 
