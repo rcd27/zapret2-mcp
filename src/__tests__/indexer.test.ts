@@ -75,4 +75,68 @@ describe("KnowledgeIndex", () => {
     const withVersion = index.all().filter((e) => e.zapret2Version || e.blockcheckwVersion);
     expect(withVersion.length).toBeGreaterThan(0);
   });
+
+  // --- P0: chunk-level retrieval ---
+
+  it("returns chunks, not full documents", () => {
+    const fullDoc = index.all().find((e) => e.path.includes("common-issues"));
+    const results = index.query("DNS не резолвится", 2000);
+    const matched = results.find((r) => r.path.includes("common-issues"));
+    if (fullDoc && matched) {
+      expect(matched.content.length).toBeLessThan(fullDoc.content.length);
+    }
+  });
+
+  it("default token limit caps response size", () => {
+    // Without explicit tokens, query uses no limit internally,
+    // but index.ts applies 4000 default. Here we test the mechanism.
+    const unlimited = index.query("strategy");
+    const limited = index.query("strategy", 4000);
+    const unlimitedChars = unlimited.reduce((sum, e) => sum + e.content.length, 0);
+    const limitedChars = limited.reduce((sum, e) => sum + e.content.length, 0);
+    expect(limitedChars).toBeLessThanOrEqual(unlimitedChars);
+  });
+
+  // --- P0: intent detection ---
+
+  it("boosts troubleshooting docs for error-like queries", () => {
+    const results = index.query("ошибка nfqws2 не работает");
+    expect(results.length).toBeGreaterThan(0);
+    // Troubleshooting doc should appear before config reference
+    const troubleshootIdx = results.findIndex((r) => r.path.startsWith("troubleshooting/"));
+    const configIdx = results.findIndex((r) => r.path.startsWith("config/"));
+    if (troubleshootIdx >= 0 && configIdx >= 0) {
+      expect(troubleshootIdx).toBeLessThan(configIdx);
+    }
+  });
+
+  it("boosts config docs for reference-like queries", () => {
+    const results = index.query("параметры nfqws2 options syntax");
+    expect(results.length).toBeGreaterThan(0);
+    expect(results[0].path.startsWith("config/")).toBe(true);
+  });
+
+  it("boosts workflow docs for howto queries", () => {
+    const results = index.query("как установить zapret2 setup install");
+    expect(results.length).toBeGreaterThan(0);
+    const workflowIdx = results.findIndex((r) => r.path.startsWith("workflows/"));
+    expect(workflowIdx).toBeGreaterThanOrEqual(0);
+    expect(workflowIdx).toBeLessThanOrEqual(2); // in top 3
+  });
+
+  it("section title match boosts relevant chunks", () => {
+    const results = index.query("circular стратегия автоперебор");
+    expect(results.length).toBeGreaterThan(0);
+    const content = results[0].content.toLowerCase();
+    expect(content).toContain("circular");
+  });
+
+  it("groups multiple chunks from same document", () => {
+    const results = index.query("fake multisplit strategy");
+    for (const r of results) {
+      // Each result should appear only once (no duplicate paths)
+      const count = results.filter((x) => x.path === r.path).length;
+      expect(count).toBe(1);
+    }
+  });
 });

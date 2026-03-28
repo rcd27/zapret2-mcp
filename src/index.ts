@@ -41,10 +41,11 @@ server.tool(
   "Search zapret2 and blockcheckw knowledge base by topic. Returns relevant documentation, strategy guides, configuration references, and troubleshooting information.",
   {
     topic: z.string().describe("What to search for (e.g. 'split2 strategy', 'blockcheckw scan', 'troubleshooting dns', 'config nfqws2_opt')"),
-    tokens: z.number().optional().describe("Maximum approximate token count for the response (default: no limit)"),
+    tokens: z.number().optional().describe("Maximum approximate token count for the response (default: 4000). Use 0 for unlimited."),
   },
   async (args) => {
-    const results = index.query(args.topic, args.tokens);
+    const tokenLimit = args.tokens === 0 ? undefined : (args.tokens ?? 4000);
+    const results = index.query(args.topic, tokenLimit);
 
     if (results.length === 0) {
       return {
