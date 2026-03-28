@@ -2,6 +2,7 @@
 
 [![CI](https://github.com/rcd27/zapret2-mcp/actions/workflows/ci.yml/badge.svg)](https://github.com/rcd27/zapret2-mcp/actions/workflows/ci.yml)
 [![npm](https://img.shields.io/npm/v/zapret2-mcp)](https://www.npmjs.com/package/zapret2-mcp)
+[![downloads](https://img.shields.io/npm/dm/zapret2-mcp)](https://www.npmjs.com/package/zapret2-mcp)
 [![Knowledge Base](https://img.shields.io/badge/knowledge_base-32_articles-green)](./knowledge/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
