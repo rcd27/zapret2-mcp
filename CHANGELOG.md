@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.7.1](https://github.com/rcd27/zapret2-mcp/compare/v0.7.0...v0.7.1) (2026-03-28)
+
+
+### Features
+
+* **knowledge:** deep-wiki, как источник №1 ([5ed5d46](https://github.com/rcd27/zapret2-mcp/commit/5ed5d4637f2be2a5710f60bf8a54ab38eaaddb85))
+
 ## [0.7.0](https://github.com/rcd27/zapret2-mcp/compare/v0.6.1...v0.7.0) (2026-03-28)
 
 
