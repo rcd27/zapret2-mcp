@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.5.1](https://github.com/rcd27/zapret2-mcp/compare/v0.5.0...v0.5.1) (2026-03-28)
+
+
+### Bug Fixes
+
+* **docs:** исправлен полностью устаревший README.md ([8f94e86](https://github.com/rcd27/zapret2-mcp/commit/8f94e86531802db7b9a05225ebe4b1d88a05b072))
+
 ## [0.5.0](https://github.com/rcd27/zapret2-mcp/compare/v0.4.0...v0.5.0) (2026-03-28)
 
 
