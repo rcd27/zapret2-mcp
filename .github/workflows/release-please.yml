@@ -25,7 +25,6 @@ jobs:
     needs: release-please
     if: ${{ needs.release-please.outputs.release_created }}
     runs-on: ubuntu-latest
-    environment: release
 
     permissions:
       contents: read
