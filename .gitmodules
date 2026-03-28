@@ -1,0 +1,6 @@
+[submodule "reference/zapret2"]
+	path = reference/zapret2
+	url = https://github.com/bol-van/zapret2.git
+[submodule "reference/blockcheckw"]
+	path = reference/blockcheckw
+	url = https://github.com/rcd27/blockcheckw.git

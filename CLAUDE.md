@@ -4,7 +4,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Описание проекта
 
-MCP-сервер для управления zapret2 (инструмент обработки сетевых пакетов от bol-van) на OpenWrt-роутерах и Linux-десктопах. Позволяет LLM-агенту автоматизировать установку, настройку и диагностику zapret2 через Model Context Protocol.
+MCP-сервер для управления zapret2 (инструмент обработки сетевых пакетов от bol-van) на OpenWrt-роутерах и
+Linux-десктопах. Позволяет LLM-агенту автоматизировать установку, настройку и диагностику zapret2 через Model Context
+Protocol.
 
 ## Docker-окружение для разработки
 
@@ -79,28 +81,28 @@ npm run test:integration  # интеграционные тесты (требу�
 
 - `src/index.ts` — точка входа, инициализация executor, регистрация tools, resources, prompts, StdioTransport
 - `src/executor/` — абстракция транспорта (CommandExecutor interface):
-  - `types.ts` — интерфейсы `ExecResult`, `CommandExecutor`
-  - `local.ts` — `LocalExecutor` (прямое выполнение bash на хосте)
-  - `docker.ts` — `DockerExecutor` (через `docker exec`)
-  - `ssh.ts` — `SshExecutor` (через ssh бинарь, без библиотек)
-  - `factory.ts` — фабрика: читает `ZAPRET2_MODE` из env
-  - `index.ts` — barrel re-export
+    - `types.ts` — интерфейсы `ExecResult`, `CommandExecutor`
+    - `local.ts` — `LocalExecutor` (прямое выполнение bash на хосте)
+    - `docker.ts` — `DockerExecutor` (через `docker exec`)
+    - `ssh.ts` — `SshExecutor` (через ssh бинарь, без библиотек)
+    - `factory.ts` — фабрика: читает `ZAPRET2_MODE` из env
+    - `index.ts` — barrel re-export
 - `src/executorInstance.ts` — синглтон executor (initExecutor/getExecutor)
 - `src/logStore.ts` — персистентное хранение логов в `~/.zapret2-mcp/logs/`
 - `src/resources.ts` — MCP Resources (resource template `zapret2://logs/{type}/{timestamp}`)
 - `src/prompts.ts` — MCP Prompts (5 пошаговых сценариев)
 - `src/tools/` — 13 MCP tools:
-  - `detectSystem` — определение окружения (OS, arch, init, WAN, DNS, NFQUEUE, контейнер)
-  - `getStatus` — статус сервиса (PID, nft rules, enabled)
-  - `startService` / `stopService` / `restartService` — управление сервисом
-  - `getConfig` — чтение конфига (целиком или по ключу)
-  - `updateConfig` — обновление параметра конфига (key=value, base64-safe)
-  - `configureDns` — настройка DNS (resolv.conf или systemd-resolved)
-  - `runBlockcheck` — запуск blockcheck2.sh для подбора сетевых стратегий
-  - `checkPrerequisites` — проверка окружения (tools, OS, init, NFQUEUE, arch, network)
-  - `installZapret` — полная установка zapret2 с нуля (auto-detect WAN)
-  - `verifyBypass` — проверка сетевой связности
-  - `createSystemdService` — создание systemd unit для автозапуска на десктопе
+    - `detectSystem` — определение окружения (OS, arch, init, WAN, DNS, NFQUEUE, контейнер)
+    - `getStatus` — статус сервиса (PID, nft rules, enabled)
+    - `startService` / `stopService` / `restartService` — управление сервисом
+    - `getConfig` — чтение конфига (целиком или по ключу)
+    - `updateConfig` — обновление параметра конфига (key=value, base64-safe)
+    - `configureDns` — настройка DNS (resolv.conf или systemd-resolved)
+    - `runBlockcheck` — запуск blockcheck2.sh для подбора сетевых стратегий
+    - `checkPrerequisites` — проверка окружения (tools, OS, init, NFQUEUE, arch, network)
+    - `installZapret` — полная установка zapret2 с нуля (auto-detect WAN)
+    - `verifyBypass` — проверка сетевой связности
+    - `createSystemdService` — создание systemd unit для автозапуска на десктопе
 
 ### MCP Prompts (5)
 
@@ -112,7 +114,8 @@ npm run test:integration  # интеграционные тесты (требу�
 
 ### MCP Resources — логи с историчностью
 
-Tools сохраняют свой вывод в файлы для персистентной истории. Агент может возвращаться к предыдущим результатам и сравнивать прогоны.
+Tools сохраняют свой вывод в файлы для персистентной истории. Агент может возвращаться к предыдущим результатам и
+сравнивать прогоны.
 
 **Структура логов:** `~/.zapret2-mcp/logs/{blockcheck,service,config}/{timestamp}.log`
 
@@ -121,6 +124,7 @@ Tools сохраняют свой вывод в файлы для персист
 **Resource template URI:** `zapret2://logs/{type}/{timestamp}`
 
 Какие tools сохраняют логи:
+
 - `runBlockcheck` → `blockcheck/` (полный вывод blockcheck2.sh, краткий ответ в tool response)
 - `startService`/`stopService`/`restartService` → `service/` (вывод init-скрипта)
 - `updateConfig` → `config/` (снапшот конфига **до** изменения)
@@ -137,14 +141,14 @@ Tools сохраняют свой вывод в файлы для персист
 
 ### Переменные окружения
 
-| Переменная | Default | Описание |
-|---|---|---|
-| `ZAPRET2_MODE` | `docker` | Транспорт: `local` / `docker` / `ssh` |
-| `ZAPRET2_CONTAINER_NAME` | `zapret2-openwrt` | Контейнер (docker mode) |
-| `ZAPRET2_SSH_HOST` | — (обязательно для ssh) | SSH хост |
-| `ZAPRET2_SSH_USER` | `root` | SSH пользователь |
-| `ZAPRET2_SSH_KEY` | — (опционально) | Путь к SSH-ключу |
-| `ZAPRET2_SSH_PORT` | `22` | SSH порт |
+| Переменная               | Default                 | Описание                              |
+|--------------------------|-------------------------|---------------------------------------|
+| `ZAPRET2_MODE`           | `docker`                | Транспорт: `local` / `docker` / `ssh` |
+| `ZAPRET2_CONTAINER_NAME` | `zapret2-openwrt`       | Контейнер (docker mode)               |
+| `ZAPRET2_SSH_HOST`       | — (обязательно для ssh) | SSH хост                              |
+| `ZAPRET2_SSH_USER`       | `root`                  | SSH пользователь                      |
+| `ZAPRET2_SSH_KEY`        | — (опционально)         | Путь к SSH-ключу                      |
+| `ZAPRET2_SSH_PORT`       | `22`                    | SSH порт                              |
 
 ### Поддерживаемые платформы
 
