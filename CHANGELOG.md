@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.7.3](https://github.com/rcd27/zapret2-mcp/compare/v0.7.2...v0.7.3) (2026-03-28)
+
+
+### Bug Fixes
+
+* **readme:** актуальное состояние базы знаний в readme ([c91441c](https://github.com/rcd27/zapret2-mcp/commit/c91441ce8ef223bbcfe15619a01ba5f2fa7066ad))
+
 ## [0.7.2](https://github.com/rcd27/zapret2-mcp/compare/v0.7.1...v0.7.2) (2026-03-28)
 
 
