@@ -1,5 +1,24 @@
 # Changelog
 
+## [0.6.0](https://github.com/rcd27/zapret2-mcp/compare/v0.5.2...v0.6.0) (2026-03-28)
+
+
+### ⚠ BREAKING CHANGES
+
+* **contract:** пересмотрен подход к составлению статей
+
+### Features
+
+* **contract:** пересмотрен подход к составлению статей ([30ae044](https://github.com/rcd27/zapret2-mcp/commit/30ae0446f70a826f72c03f1294faec0bb795af63))
+* **knowledge:** возможности с MTProto ([b5c4cb1](https://github.com/rcd27/zapret2-mcp/commit/b5c4cb190bdebef89719d4432be54165c3d44d50))
+
+
+### Bug Fixes
+
+* **ci-cd:** trusted publishing ([d782a13](https://github.com/rcd27/zapret2-mcp/commit/d782a13e9624c43a02f2e7f65e0469d6c0b02a7a))
+* **ci-cd:** выпелен environment из релиза ([a165212](https://github.com/rcd27/zapret2-mcp/commit/a165212d70bcb52fd140f89d413273ff8463281c))
+* **knowledge:** шапка для статей ([fba333c](https://github.com/rcd27/zapret2-mcp/commit/fba333c14dcf53a80d7b3077c5b5263263a298a7))
+
 ## [0.5.2](https://github.com/rcd27/zapret2-mcp/compare/v0.5.1...v0.5.2) (2026-03-28)
 
 
