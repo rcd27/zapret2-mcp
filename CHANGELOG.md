@@ -1,5 +1,21 @@
 # Changelog
 
+## [0.6.1](https://github.com/rcd27/zapret2-mcp/compare/v0.6.0...v0.6.1) (2026-03-28)
+
+
+### Features
+
+* **knowledge:** особенности UCI конфигураций ([87183b0](https://github.com/rcd27/zapret2-mcp/commit/87183b04c0cde28a2afdfcf649531bb312367fc7))
+* **knowledge:** статья про blobs ([107e3c1](https://github.com/rcd27/zapret2-mcp/commit/107e3c162ff8ce0eb57ac48061c92b5b5e5ffa52))
+* **knowledge:** статья про Discord ([f06bced](https://github.com/rcd27/zapret2-mcp/commit/f06bced1feaab72d27ea0599a8155fda9fb1f65a))
+* **knowledge:** типичные проблемы с IPV6 ([7730dd9](https://github.com/rcd27/zapret2-mcp/commit/7730dd9fee564df91f0c24eb4a6c5631ec9324ab))
+
+
+### Bug Fixes
+
+* **readme:** переработка readme ([1f45a84](https://github.com/rcd27/zapret2-mcp/commit/1f45a84c9cca188b8f16713ff11c8327273ee7f3))
+* **reference:** ссылки на оригинальные статьи по ТСПУ ([c275b60](https://github.com/rcd27/zapret2-mcp/commit/c275b60396d7b00a4f1cc97515e7e1c616eaacdd))
+
 ## [0.6.0](https://github.com/rcd27/zapret2-mcp/compare/v0.5.2...v0.6.0) (2026-03-28)
 
 
