@@ -1,7 +1,7 @@
 {
   "name": "zapret2-mcp",
-  "version": "0.3.6",
-  "description": "MCP server for managing zapret2 network packet processing tool on OpenWrt routers and Linux desktops via Docker, SSH, or locally",
+  "version": "0.4.0",
+  "description": "MCP knowledge server for zapret2 DPI bypass tool and blockcheckw strategy scanner",
   "license": "MIT",
   "author": "Stanislav Zemlyakov",
   "repository": {
@@ -19,6 +19,7 @@
   },
   "files": [
     "build",
+    "knowledge",
     "README.md",
     "LICENSE",
     "CHANGELOG.md"

@@ -10,89 +10,78 @@ describe("MCP Server integration", () => {
     transport = new StdioClientTransport({
       command: "node",
       args: ["build/index.js"],
-      env: {
-        ...process.env,
-        ZAPRET2_MODE: "docker",
-        ZAPRET2_CONTAINER_NAME: "zapret2-openwrt",
-      },
     });
 
     client = new Client({ name: "test-client", version: "1.0.0" });
     await client.connect(transport);
-  });
+  }, 10_000);
 
   afterAll(async () => {
     await client?.close();
   });
 
-  it("lists all 13 tools", async () => {
+  it("server identifies as zapret2-mcp v0.4.0", () => {
+    const info = client.getServerVersion();
+    expect(info?.name).toBe("zapret2-mcp");
+    expect(info?.version).toBe("0.4.0");
+  });
+
+  it("lists query-zapret-knowledge tool", async () => {
     const { tools } = await client.listTools();
     const names = tools.map((t) => t.name);
-    expect(names).toContain("getStatus");
-    expect(names).toContain("startService");
-    expect(names).toContain("stopService");
-    expect(names).toContain("restartService");
-    expect(names).toContain("getConfig");
-    expect(names).toContain("updateConfig");
-    expect(names).toContain("runBlockcheck");
-    expect(names).toContain("checkPrerequisites");
-    expect(names).toContain("installZapret");
-    expect(names).toContain("verifyBypass");
-    expect(names).toContain("detectSystem");
-    expect(names).toContain("configureDns");
-    expect(names).toContain("createSystemdService");
-    expect(tools.length).toBe(13);
+    expect(names).toContain("query-zapret-knowledge");
+    expect(tools.length).toBe(1);
   });
 
-  it("getStatus returns JSON with expected fields", async () => {
-    const result = await client.callTool({ name: "getStatus", arguments: {} });
-    const text = (result.content as Array<{ type: string; text: string }>)[0].text;
-    const parsed = JSON.parse(text);
-    expect(parsed).toHaveProperty("running");
-    expect(parsed).toHaveProperty("pid");
-    expect(parsed).toHaveProperty("nftRulesCount");
-  });
-
-  it("getConfig returns text with config content", async () => {
-    const result = await client.callTool({ name: "getConfig", arguments: {} });
-    const text = (result.content as Array<{ type: string; text: string }>)[0].text;
-    expect(text).toContain("NFQWS2_ENABLE");
-  });
-
-  it("detectSystem returns JSON with expected fields", async () => {
-    const result = await client.callTool({ name: "detectSystem", arguments: {} });
-    const text = (result.content as Array<{ type: string; text: string }>)[0].text;
-    const parsed = JSON.parse(text);
-    expect(parsed).toHaveProperty("os");
-    expect(parsed).toHaveProperty("arch");
-    expect(parsed).toHaveProperty("initSystem");
-    expect(parsed).toHaveProperty("wanInterface");
-    expect(parsed).toHaveProperty("nfqueueModule");
-    expect(parsed).toHaveProperty("inContainer");
-  });
-
-  it("listResources returns an array", async () => {
-    const { resources } = await client.listResources();
-    expect(Array.isArray(resources)).toBe(true);
-  });
-
-  it("listPrompts returns 5 prompts", async () => {
+  it("lists prompts", async () => {
     const { prompts } = await client.listPrompts();
+    expect(prompts.length).toBe(4);
     const names = prompts.map((p) => p.name);
     expect(names).toContain("setup-zapret");
     expect(names).toContain("find-bypass-strategy");
     expect(names).toContain("troubleshoot");
-    expect(names).toContain("setup-desktop");
-    expect(names).toContain("overview");
-    expect(prompts.length).toBe(5);
+    expect(names).toContain("strategy-knowledge");
   });
 
-  it("getPrompt overview returns messages", async () => {
-    const result = await client.getPrompt({ name: "overview" });
-    expect(result.messages).toHaveLength(1);
-    expect(result.messages[0].role).toBe("user");
-    const content = result.messages[0].content as { type: string; text: string };
-    expect(content.type).toBe("text");
-    expect(content.text.length).toBeGreaterThan(0);
+  it("query-zapret-knowledge returns results for 'split2'", async () => {
+    const result = await client.callTool({
+      name: "query-zapret-knowledge",
+      arguments: { topic: "split2" },
+    });
+    expect(result.content).toBeDefined();
+    const text = (result.content as Array<{ type: string; text: string }>)[0].text;
+    expect(text).toContain("split2");
+  });
+
+  it("query-zapret-knowledge returns results for 'blockcheckw'", async () => {
+    const result = await client.callTool({
+      name: "query-zapret-knowledge",
+      arguments: { topic: "blockcheckw scan" },
+    });
+    const text = (result.content as Array<{ type: string; text: string }>)[0].text;
+    expect(text).toContain("blockcheckw");
+  });
+
+  it("query-zapret-knowledge returns no results message for nonsense", async () => {
+    const result = await client.callTool({
+      name: "query-zapret-knowledge",
+      arguments: { topic: "xyzzy foobar baz" },
+    });
+    const text = (result.content as Array<{ type: string; text: string }>)[0].text;
+    expect(text).toContain("No results found");
+  });
+
+  it("query-zapret-knowledge respects token limit", async () => {
+    const unlimited = await client.callTool({
+      name: "query-zapret-knowledge",
+      arguments: { topic: "strategy" },
+    });
+    const limited = await client.callTool({
+      name: "query-zapret-knowledge",
+      arguments: { topic: "strategy", tokens: 500 },
+    });
+    const unlimitedText = (unlimited.content as Array<{ type: string; text: string }>)[0].text;
+    const limitedText = (limited.content as Array<{ type: string; text: string }>)[0].text;
+    expect(limitedText.length).toBeLessThanOrEqual(unlimitedText.length);
   });
 });

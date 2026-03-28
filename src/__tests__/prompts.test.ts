@@ -21,16 +21,14 @@ describe("prompts", () => {
     await client?.close();
   });
 
-  it("lists all 6 prompts", async () => {
+  it("lists all 4 prompts", async () => {
     const { prompts } = await client.listPrompts();
     const names = prompts.map((p) => p.name);
     expect(names).toContain("setup-zapret");
     expect(names).toContain("find-bypass-strategy");
     expect(names).toContain("troubleshoot");
-    expect(names).toContain("setup-desktop");
     expect(names).toContain("strategy-knowledge");
-    expect(names).toContain("overview");
-    expect(prompts.length).toBe(6);
+    expect(prompts.length).toBe(4);
   });
 
   it("setup-zapret returns messages with non-empty text", async () => {
@@ -42,13 +40,10 @@ describe("prompts", () => {
     expect((content as { type: "text"; text: string }).text.length).toBeGreaterThan(0);
   });
 
-  it("overview returns messages with non-empty text", async () => {
-    const result = await client.getPrompt({ name: "overview" });
-    expect(result.messages).toHaveLength(1);
-    expect(result.messages[0].role).toBe("user");
-    const content = result.messages[0].content;
-    expect(content).toMatchObject({ type: "text" });
-    expect((content as { type: "text"; text: string }).text).toContain("Available Tools");
+  it("setup-zapret mentions query-zapret-knowledge", async () => {
+    const result = await client.getPrompt({ name: "setup-zapret" });
+    const text = (result.messages[0].content as { type: "text"; text: string }).text;
+    expect(text).toContain("query-zapret-knowledge");
   });
 
   it("find-bypass-strategy accepts domain argument", async () => {
@@ -68,6 +63,12 @@ describe("prompts", () => {
     expect(text).toContain("Ask the user");
   });
 
+  it("find-bypass-strategy mentions blockcheckw", async () => {
+    const result = await client.getPrompt({ name: "find-bypass-strategy", arguments: {} });
+    const text = (result.messages[0].content as { type: "text"; text: string }).text;
+    expect(text).toContain("blockcheckw");
+  });
+
   it("troubleshoot accepts domain argument", async () => {
     const result = await client.getPrompt({
       name: "troubleshoot",
@@ -85,15 +86,12 @@ describe("prompts", () => {
     expect(text).toContain("Ask the user");
   });
 
-  it("setup-desktop returns messages with systemd content", async () => {
-    const result = await client.getPrompt({ name: "setup-desktop" });
+  it("strategy-knowledge returns comprehensive guide prompt", async () => {
+    const result = await client.getPrompt({ name: "strategy-knowledge" });
     expect(result.messages).toHaveLength(1);
-    expect(result.messages[0].role).toBe("user");
     const text = (result.messages[0].content as { type: "text"; text: string }).text;
-    expect(text).toContain("systemd");
-    expect(text).toContain("detectSystem");
-    expect(text).toContain("configureDns");
-    expect(text).toContain("createSystemdService");
+    expect(text).toContain("query-zapret-knowledge");
+    expect(text).toContain("split2");
   });
 
   it("each prompt has a description", async () => {
