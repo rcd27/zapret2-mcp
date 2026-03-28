@@ -3,6 +3,9 @@ title: Find Bypass Strategy Workflow
 zapret2-version: v0.9.4.5
 blockcheckw-version: v0.8.3
 tags: strategy, blockcheckw, scan, check, bypass, workflow
+source: official-docs
+created: 2026-03-25
+updated: 2026-03-25
 ---
 
 # Поиск рабочей стратегии DPI bypass

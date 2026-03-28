@@ -1,6 +1,9 @@
 ---
 title: TSPU Blocking Methods and Protocol Degradation
 tags: tspu, blocking, degradation, capacity, rst, redirect, drop, dpi-list, quic
+source: official-docs
+created: 2026-03-25
+updated: 2026-03-25
 ---
 
 # Методы блокировки ТСПУ

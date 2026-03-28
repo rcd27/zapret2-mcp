@@ -1,6 +1,9 @@
 ---
 title: TSPU Architecture — How Russian DPI Works
 tags: tspu, dpi, architecture, ecofilter, bypass, balancer, filter, blocking
+source: official-docs
+created: 2026-03-25
+updated: 2026-03-25
 ---
 
 # Архитектура ТСПУ (DPI-система блокировок)

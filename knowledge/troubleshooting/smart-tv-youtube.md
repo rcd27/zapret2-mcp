@@ -2,7 +2,7 @@
 title: Smart TV и YouTube — диагностика и решения
 zapret2-version: v0.9.4.5
 tags: troubleshooting, smart-tv, youtube, tls, samsung, tizen, lg, webos, vidaa, platforms
-source: telegram/@routerich, telegram/@itdogchat, community
+source: community
 created: 2026-03-28
 updated: 2026-03-28
 ---

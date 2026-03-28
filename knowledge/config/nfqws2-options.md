@@ -2,6 +2,9 @@
 title: nfqws2 Command-Line Options Reference
 zapret2-version: v0.9.4.5
 tags: nfqws2, cli, options, parameters, reference
+source: official-docs
+created: 2026-03-25
+updated: 2026-03-25
 ---
 
 # Справочник параметров nfqws2

@@ -2,7 +2,7 @@
 title: Миграция стратегий zapret v1 → zapret2 (lua-desync)
 zapret2-version: v0.9.4.5
 tags: migration, v1, v2, lua-desync, dpi-desync, config, conversion
-source: telegram/@itdogchat, telegram/@routerich, community
+source: community
 created: 2026-03-28
 updated: 2026-03-28
 ---

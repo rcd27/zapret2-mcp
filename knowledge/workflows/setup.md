@@ -2,6 +2,9 @@
 title: Installation Workflow
 zapret2-version: v0.9.4.5
 tags: install, setup, workflow, router, desktop
+source: official-docs
+created: 2026-03-25
+updated: 2026-03-25
 ---
 
 # Установка zapret2

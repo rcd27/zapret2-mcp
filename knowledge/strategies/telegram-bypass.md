@@ -2,7 +2,7 @@
 title: Telegram и zapret2 — что можно обойти, а что нет
 zapret2-version: v0.9.4.5
 tags: telegram, mtproto, ip-block, dpi, bypass, vpn, strategies
-source: telegram/@itdogchat, telegram/@routerich, community
+source: community
 created: 2026-03-28
 updated: 2026-03-28
 ---
