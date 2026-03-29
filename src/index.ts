@@ -34,7 +34,12 @@ Use the query-zapret-knowledge tool to search the knowledge base.
 IMPORTANT: The entire knowledge base is written in Russian. Always query in Russian for accurate results (e.g. 'стратегия split2' instead of 'split2 strategy').
 Use getPrompt for guided workflows: setup-zapret, find-bypass-strategy, troubleshoot, strategy-knowledge.
 
-This server does NOT execute commands — it provides knowledge and guidance. The consuming agent executes commands directly.`,
+This server does NOT execute commands — it provides knowledge and guidance. The consuming agent executes commands directly.
+
+FALLBACK: If query-zapret-knowledge returns no results or insufficient information, check these primary sources directly (via web fetch):
+1. DeepWiki (most complete, generated from source code): https://deepwiki.com/bol-van/zapret2
+2. Official docs: https://github.com/bol-van/zapret2/blob/master/docs/manual.md
+3. Community docs (Obsidian Publish): https://publish.obsidian.md/zapret — raw markdown available at https://publish-01.obsidian.md/access/18b1b883e5b94cb062854c94fb182bb4/{path}.md (e.g. Zapret/Zapret2%20-%20lua-desync.md)`,
   },
 );
 
@@ -55,7 +60,7 @@ server.tool(
         content: [
           {
             type: "text" as const,
-            text: `No results found for "${args.topic}". The knowledge base is in Russian — try querying in Russian. Broader keywords to try: стратегии, конфигурация, blockcheckw, диагностика, установка, платформы.`,
+            text: `No results found for "${args.topic}". The knowledge base is in Russian — try querying in Russian. Broader keywords to try: стратегии, конфигурация, blockcheckw, диагностика, установка, платформы.\n\nFallback: check primary sources directly via web fetch:\n1. https://deepwiki.com/bol-van/zapret2 (most complete)\n2. https://github.com/bol-van/zapret2/blob/master/docs/manual.md\n3. https://publish-01.obsidian.md/access/18b1b883e5b94cb062854c94fb182bb4/Zapret/home.md (community docs, raw markdown)`,
           },
         ],
       };
