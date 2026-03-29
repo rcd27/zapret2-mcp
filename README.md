@@ -3,12 +3,12 @@
 [![CI](https://github.com/rcd27/zapret2-mcp/actions/workflows/ci.yml/badge.svg)](https://github.com/rcd27/zapret2-mcp/actions/workflows/ci.yml)
 [![npm](https://img.shields.io/npm/v/zapret2-mcp)](https://www.npmjs.com/package/zapret2-mcp)
 [![downloads](https://img.shields.io/npm/dm/zapret2-mcp)](https://www.npmjs.com/package/zapret2-mcp)
-[![Knowledge Base](https://img.shields.io/badge/knowledge_base-35_articles-green)](./knowledge/)
+[![Knowledge Base](https://img.shields.io/badge/knowledge_base-37_articles-green)](./knowledge/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
 База знаний по [zapret2](https://github.com/bol-van/zapret2) (DPI bypass) и [blockcheckw](https://github.com/rcd27/blockcheckw) (сканер стратегий). Работает как [MCP-сервер](https://modelcontextprotocol.io/) для LLM-агентов и как обычная документация.
 
-> **Можно использовать без агентов.** [`knowledge/`](./knowledge/) — 35 статей на русском языке. Открывайте и читайте как обычную документацию, без установки чего-либо.
+> **Можно использовать без агентов.** [`knowledge/`](./knowledge/) — 37 статей на русском языке. Открывайте и читайте как обычную документацию, без установки чего-либо.
 
 ## Что внутри
 
@@ -16,11 +16,11 @@
 |--------|--------|------|
 | [strategies/](./knowledge/strategies/) | 10 | TCP segmentation, fake packets, Lua scripting, QUIC, circular, Discord, Telegram, orchestration, community production strategies |
 | [config/](./knowledge/config/) | 9 | nfqws2 CLI, zapret2 config, desync profiles, hostlists/ipsets, auto-hostlist, security hardening, UCI, blobs, миграция v1 → v2 |
-| [troubleshooting/](./knowledge/troubleshooting/) | 5 | Smart TV + YouTube, QUIC, IPv6, FLOWOFFLOAD, конфликты с Podkop |
+| [troubleshooting/](./knowledge/troubleshooting/) | 6 | Smart TV + YouTube, YouTube видео не грузится (googlevideo CDN), QUIC, IPv6, FLOWOFFLOAD, конфликты с Podkop |
 | [tspu/](./knowledge/tspu/) | 6 | Архитектура ТСПУ, DPI engine, методы блокировки, двухстадийная система, ночные реконфигурации, юридические риски |
 | [workflows/](./knowledge/workflows/) | 2 | Установка, поиск стратегии |
 | [blockcheckw/](./knowledge/blockcheckw/) | 2 | Overview, команды |
-| [platforms/](./knowledge/platforms/) | 1 | Linux, OpenWrt, Windows, FreeBSD, OpenBSD, Android |
+| [platforms/](./knowledge/platforms/) | 2 | Linux, OpenWrt, Windows, FreeBSD, OpenBSD, Android, десктопный Linux + nftables |
 
 ## Подключение к LLM-агенту
 
