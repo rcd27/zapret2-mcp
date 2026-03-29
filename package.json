@@ -50,7 +50,8 @@
     "test:watch": "vitest",
     "test:integration": "npm run build && vitest run --config vitest.integration.config.ts",
     "test:coverage": "vitest run --coverage",
-    "prepublishOnly": "npm run build && npm test"
+    "prepublishOnly": "npm run build && npm test",
+    "import:obsidian": "npx tsx scripts/import-obsidian.ts"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.6.0",

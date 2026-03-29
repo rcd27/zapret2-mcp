@@ -3,12 +3,12 @@
 [![CI](https://github.com/rcd27/zapret2-mcp/actions/workflows/ci.yml/badge.svg)](https://github.com/rcd27/zapret2-mcp/actions/workflows/ci.yml)
 [![npm](https://img.shields.io/npm/v/zapret2-mcp)](https://www.npmjs.com/package/zapret2-mcp)
 [![downloads](https://img.shields.io/npm/dm/zapret2-mcp)](https://www.npmjs.com/package/zapret2-mcp)
-[![Knowledge Base](https://img.shields.io/badge/knowledge_base-37_articles-green)](./knowledge/)
+[![Knowledge Base](https://img.shields.io/badge/knowledge_base-45_articles-green)](./knowledge/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
 База знаний по [zapret2](https://github.com/bol-van/zapret2) (DPI bypass) и [blockcheckw](https://github.com/rcd27/blockcheckw) (сканер стратегий). Работает как [MCP-сервер](https://modelcontextprotocol.io/) для LLM-агентов и как обычная документация.
 
-> **Можно использовать без агентов.** [`knowledge/`](./knowledge/) — 37 статей на русском языке. Открывайте и читайте как обычную документацию, без установки чего-либо.
+> **Можно использовать без агентов.** [`knowledge/`](./knowledge/) — 45 статей на русском языке. Открывайте и читайте как обычную документацию, без установки чего-либо.
 
 ## Что внутри
 
@@ -21,6 +21,7 @@
 | [workflows/](./knowledge/workflows/) | 2 | Установка, поиск стратегии |
 | [blockcheckw/](./knowledge/blockcheckw/) | 2 | Overview, команды |
 | [platforms/](./knowledge/platforms/) | 2 | Linux, OpenWrt, Windows, FreeBSD, OpenBSD, Android, десктопный Linux + nftables |
+| [obsidian-gui/](./knowledge/obsidian-gui/) | 8 | lua-desync справочник, payload типы, out-range/in-range, блобы, WinDivert фильтры, порядок аргументов, MTProto, основные флаги |
 
 ## Подключение к LLM-агенту
 
@@ -69,6 +70,12 @@ npm start
 |------|----------|
 | `query-zapret-knowledge(topic, tokens?)` | Keyword-поиск по базе знаний с ранжированием |
 
+### Resources
+
+| URI | Описание |
+|-----|----------|
+| `zapret2://knowledge/{path}` | Прямой доступ к статьям базы знаний по пути (listResources для списка всех) |
+
 ### Prompts
 
 | Prompt | Описание |
@@ -96,6 +103,7 @@ npm start
 - [blockcheckw](https://github.com/rcd27/blockcheckw) — быстрый сканер стратегий
 - [tspu-docs](https://github.com/DanielLavrushin/tspu-docs) — документация ТСПУ
 - Academic: [IMC 2022](https://dl.acm.org/doi/10.1145/3517745.3561461), [IMC 2021](https://dl.acm.org/doi/10.1145/3487552.3487858), [NDSS 2020](https://www.ndss-symposium.org/ndss-paper/decentralized-control-a-case-study-of-russia/), [USENIX Security 2023](https://www.usenix.org/conference/usenixsecurity23/presentation/ramesh-network-responses) — рецензированные исследования архитектуры и поведения ТСПУ
+- [Zapret GUI Docs](https://publish.obsidian.md/zapret) — документация сообщества (импорт через `npm run import:obsidian`)
 - Community — обезличенные знания из открытых обсуждений
 
 ## Лицензия

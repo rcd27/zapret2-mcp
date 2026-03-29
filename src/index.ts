@@ -8,6 +8,7 @@ import { fileURLToPath } from "url";
 
 import { KnowledgeIndex } from "./indexer.js";
 import { registerPrompts } from "./prompts.js";
+import { ResourceTemplate } from "@modelcontextprotocol/sdk/server/mcp.js";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const knowledgeDir = resolve(__dirname, "..", "knowledge");
@@ -83,6 +84,38 @@ server.tool(
 );
 
 registerPrompts(server);
+
+// MCP Resources: expose knowledge articles for browsing
+server.resource(
+  "knowledge-article",
+  new ResourceTemplate("zapret2://knowledge/{+path}", {
+    list: async () => ({
+      resources: index.all().map((entry) => ({
+        uri: `zapret2://knowledge/${entry.path}`,
+        name: entry.title,
+        description: `Tags: ${entry.tags.join(", ")}`,
+        mimeType: "text/markdown" as const,
+      })),
+    }),
+  }),
+  { description: "Knowledge base article", mimeType: "text/markdown" },
+  async (uri, variables) => {
+    const path = variables.path as string;
+    const entry = index.all().find((e) => e.path === path);
+    if (!entry) {
+      throw new Error(`Article not found: ${path}`);
+    }
+    return {
+      contents: [
+        {
+          uri: uri.href,
+          mimeType: "text/markdown" as const,
+          text: `# ${entry.title}\n\n${entry.content}`,
+        },
+      ],
+    };
+  },
+);
 
 async function main() {
   const transport = new StdioServerTransport();
