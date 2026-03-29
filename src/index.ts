@@ -30,6 +30,7 @@ It provides contextual documentation and expert knowledge about:
 - Troubleshooting common issues
 
 Use the query-zapret-knowledge tool to search the knowledge base.
+IMPORTANT: The entire knowledge base is written in Russian. Always query in Russian for accurate results (e.g. 'стратегия split2' instead of 'split2 strategy').
 Use getPrompt for guided workflows: setup-zapret, find-bypass-strategy, troubleshoot, strategy-knowledge.
 
 This server does NOT execute commands — it provides knowledge and guidance. The consuming agent executes commands directly.`,
@@ -38,11 +39,11 @@ This server does NOT execute commands — it provides knowledge and guidance. Th
 
 server.tool(
   "query-zapret-knowledge",
-  "Search zapret2 and blockcheckw knowledge base by topic. Returns relevant documentation, strategy guides, configuration references, and troubleshooting information.",
+  "Search zapret2 and blockcheckw knowledge base by topic. Returns relevant documentation, strategy guides, configuration references, and troubleshooting information. IMPORTANT: The entire knowledge base is in Russian. Always send queries in Russian for best results.",
   {
-    topic: z.string().describe("What to search for (e.g. 'split2 strategy', 'blockcheckw scan', 'troubleshooting dns', 'config nfqws2_opt')"),
+    topic: z.string().describe("What to search for — MUST be in Russian (e.g. 'стратегия split2', 'сканирование blockcheckw', 'диагностика dns', 'конфигурация nfqws2_opt')"),
     tokens: z.number().optional().describe("Maximum approximate token count for the response (default: 4000). Use 0 for unlimited."),
-    context: z.string().optional().describe("What you already know or checked (e.g. 'curl OK on router, QUIC disabled, flow_offloading_hw=1'). Helps narrow results by deprioritizing already-covered topics."),
+    context: z.string().optional().describe("What you already know or checked, in Russian (e.g. 'curl работает на роутере, QUIC отключен, flow_offloading_hw=1'). Helps narrow results by deprioritizing already-covered topics."),
   },
   async (args) => {
     const tokenLimit = args.tokens === 0 ? undefined : (args.tokens ?? 4000);
@@ -53,7 +54,7 @@ server.tool(
         content: [
           {
             type: "text" as const,
-            text: `No results found for "${args.topic}". Try broader keywords like: strategies, config, blockcheckw, troubleshooting, setup, platforms.`,
+            text: `No results found for "${args.topic}". The knowledge base is in Russian — try querying in Russian. Broader keywords to try: стратегии, конфигурация, blockcheckw, диагностика, установка, платформы.`,
           },
         ],
       };
