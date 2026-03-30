@@ -1,5 +1,20 @@
 # Changelog
 
+## [0.7.4](https://github.com/rcd27/zapret2-mcp/compare/v0.7.3...v0.7.4) (2026-03-30)
+
+
+### Features
+
+* **knowledge:** fallback до первоисточников, чтобы агент не гуглил лишнее ([e25c950](https://github.com/rcd27/zapret2-mcp/commit/e25c950cd90b81762484acfbda620844f4f03f16))
+* **knowledge:** обогащение статей стратегиями из community ([6e737f6](https://github.com/rcd27/zapret2-mcp/commit/6e737f65d831173b6476df3f231c5491295ed619))
+* **knowledge:** проблемы с ютубом и особенности zapret2 на десктопе ([5cd3110](https://github.com/rcd27/zapret2-mcp/commit/5cd3110aab0975c6c60be5135f3a93487584ad28))
+* **knowledge:** цикл выжимок из статей на obsidian ([ea072e2](https://github.com/rcd27/zapret2-mcp/commit/ea072e222b478d04f44d0f6b98fd552b06a25d41))
+
+
+### Bug Fixes
+
+* **contract:** явное указание языка ([1b4ca5b](https://github.com/rcd27/zapret2-mcp/commit/1b4ca5b62f2f3b69390db080e440a854cb4aa840)), closes [#9](https://github.com/rcd27/zapret2-mcp/issues/9)
+
 ## [0.7.3](https://github.com/rcd27/zapret2-mcp/compare/v0.7.2...v0.7.3) (2026-03-28)
 
 
