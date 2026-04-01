@@ -4,7 +4,7 @@ zapret2-version: v0.9.4.5
 tags: dpi, domain-based, stateful, stateless, recommendations
 source: official-docs
 created: 2026-03-25
-updated: 2026-03-25
+updated: 2026-04-01
 ---
 
 # Типы DPI и рекомендуемые подходы
@@ -30,10 +30,11 @@ DPI собирает TCP-сессию и анализирует полный п�
 ```
 --dpi-desync=fake,split2 --dpi-desync-fooling=md5sig
 ```
-Или RST-инъекция:
+Или RST-инъекция (zapret2 lua-синтаксис):
 ```
---dpi-desync=rst --dpi-desync-fooling=ip_autottl
+--lua-desync=rst:ip_autottl
 ```
+> `ip_autottl` — lua-параметр, НЕ значение `--dpi-desync-fooling`. В legacy-синтаксисе v1 используется отдельный флаг `--dpi-desync-autottl`.
 
 ## Stateless DPI (инспектирует отдельные пакеты)
 
@@ -41,20 +42,18 @@ DPI смотрит на каждый пакет независимо, не со�
 
 Рекомендации:
 ```
---dpi-desync=ipfrag2
+--lua-desync=multidisorder:pos=1,midsld
 ```
-Или:
-```
---dpi-desync=disorder2
-```
+
+> `ipfrag2` (IP-фрагментация) формально существует, но TCP-фрагменты почти всегда фильтруются сетевым оборудованием. Для UDP/QUIC надёжность ~50-75%. Предпочтительнее `multidisorder`.
 
 ## HTTP-only DPI
 
 DPI блокирует только HTTP (порт 80), не трогает HTTPS.
 
-Рекомендации:
+Рекомендации (zapret2 lua-синтаксис):
 ```
---hostcase --dpi-desync=split2 --dpi-desync-split-http-req=method+host
+--lua-desync=http_hostcase --lua-desync=multisplit:pos=method,host
 ```
 
 ## Как определить тип DPI
