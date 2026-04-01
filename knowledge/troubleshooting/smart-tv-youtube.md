@@ -4,7 +4,7 @@ zapret2-version: v0.9.4.5
 tags: troubleshooting, smart-tv, youtube, tls, samsung, tizen, lg, webos, vidaa, platforms
 source: community
 created: 2026-03-28
-updated: 2026-03-28
+updated: 2026-04-01
 ---
 
 # Smart TV и YouTube: почему стратегия работает на ПК, но не на телевизоре
@@ -62,7 +62,7 @@ VIDAA, WebOS и Tizen агрессивно кешируют приложение
 - При открытии YouTube приложение сначала обращается к **серверам авторизации Samsung**, затем к Google/YouTube
 - Эти промежуточные запросы тоже могут попадать под DPI
 - На ТВ невозможно установить диагностические инструменты
-- Нельзя заменить приложение YouTube на альтернативное (нет SmartTube для Tizen)
+- SmartTube (Android-only) не работает на Tizen, но есть **TizenTube** — модуль для TizenBrew, который блокирует рекламу, поддерживает SponsorBlock и DeArrow. Установка через TizenBrew требует включения Developer Mode и USB-флешки. Подробнее: https://github.com/reisxd/TizenTube
 
 ### LG WebOS
 
@@ -126,9 +126,17 @@ NFQWS2_OPT="
 
 Первая секция — агрессивная стратегия для YouTube (покрывает и TLS 1.2, и 1.3). Вторая — более мягкая для остальных сайтов.
 
-### 4. Радикальное решение: Android TV приставка
+### 4. TizenTube для Samsung Tizen
 
-Если ничего не помогает на Samsung Tizen — наиболее надёжное решение:
+На Samsung Tizen есть альтернатива стоковому YouTube — **TizenTube** (модуль для TizenBrew):
+- Блокировка рекламы, SponsorBlock, DeArrow
+- Установка: включить Developer Mode на ТВ → установить TizenBrew через USB → TizenTube ставится как модуль
+- Из минусов: более сложный процесс установки, иногда нужно запускать TizenBrew перед открытием YouTube
+- При использовании TizenTube DPI bypass стратегии zapret2 работают нормально — трафик идёт тот же самый
+
+### 5. Радикальное решение: Android TV приставка
+
+Если ничего не помогает на Samsung Tizen (и TizenTube не подходит) — наиболее надёжное решение:
 
 1. Купить Android TV приставку (Xiaomi Mi Box, любая на Android TV)
 2. Установить SmartTube (альтернативный клиент YouTube)
@@ -143,5 +151,5 @@ NFQWS2_OPT="
 3. [ ] Запустить blockcheck2, смотреть результаты `curl_test_https_tls12`
 4. [ ] Попробовать агрессивную multidisorder стратегию (см. выше)
 5. [ ] Выдернуть ТВ из розетки перед каждой проверкой
-6. [ ] Если Samsung Tizen — рассмотреть Android TV приставку как альтернативу
+6. [ ] Если Samsung Tizen — попробовать TizenTube (ad-free + SponsorBlock) или рассмотреть Android TV приставку
 7. [ ] Проверить что Private DNS на устройствах выключен (может мешать на Android)
