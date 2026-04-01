@@ -5,7 +5,7 @@ blockcheckw-version: v0.8.3
 tags: strategy, blockcheckw, scan, check, bypass, workflow
 source: official-docs
 created: 2026-03-25
-updated: 2026-03-25
+updated: 2026-04-01
 ---
 
 # Поиск рабочей стратегии DPI bypass
@@ -51,24 +51,27 @@ blockcheckw check --from-file scan_results.txt -d rutracker.org --take 10 --pass
 ## Выбор стратегии: критерии (в порядке приоритета)
 
 1. **Стабильность** — избегать стратегий с хрупкими TTL-трюками (фиксированный ip_ttl). Предпочитать ip_autottl или non-TTL fooling.
-2. **Простота** — меньше параметров = надёжнее. Предпочитать `split2` перед сложными multi-strategy цепочками.
+2. **Простота** — меньше параметров = надёжнее. Предпочитать `multisplit` перед сложными multi-strategy цепочками.
 3. **Покрытие протоколов** — если домен использует HTTPS и HTTP, стратегия должна покрывать оба.
 4. **TLS-версия** — TLS 1.3 легче (меньше метаданных). TLS 1.2 может требовать обработку server response.
 
 ## Приоритет стратегий
 
-1. `split2` или `disorder2` — TCP segmentation без fakes, самый простой вариант
-2. `fake,split2` с `md5sig` или `badsum` fooling — надёжное удаление fakes
-3. `multisplit` / `multidisorder` — для DPI, который пересобирает split-сегменты
-4. Избегать стратегий, основанных только на `ip_ttl` — TTL зависит от маршрута
+1. `multisplit` или `multidisorder` — TCP segmentation без fakes, самый простой вариант
+2. `fakedsplit` / `fakeddisorder` с `tcp_md5` или `badsum` fooling — надёжное удаление fakes
+3. `multisplit` / `multidisorder` с несколькими `pos` — для DPI, который пересобирает single-split
+4. Избегать стратегий, основанных только на `ip_ttl` — TTL зависит от маршрута, предпочитать `ip_autottl`
 
 ## Resilience
 
-Для устойчивости к обновлениям DPI используй circular strategy:
+Для устойчивости к обновлениям DPI используй circular orchestrator из `zapret-auto.lua`:
 ```
---dpi-desync-circular-strategy=3
+--lua-desync=circular
+--lua-desync=<стратегия1>:strategy=1
+--lua-desync=<стратегия2>:strategy=2
+--lua-desync=<стратегия3>:strategy=3
 ```
-nfqws2 автоматически переключается между стратегиями при сбое.
+nfqws2 циклически переключается между пронумерованными стратегиями при обнаружении сбоев (порог задаётся через `fails=N`).
 
 ## Конструирование NFQWS2_OPT из результатов
 
