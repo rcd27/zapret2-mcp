@@ -4,7 +4,7 @@ zapret2-version: v0.9.4.5
 tags: troubleshooting, openwrt, flowoffload, podkop, zeroblock, nft, firewall, conflicts
 source: community
 created: 2026-03-28
-updated: 2026-03-28
+updated: 2026-04-01
 ---
 
 # Конфликты zapret2 с другим ПО на OpenWrt
@@ -48,7 +48,7 @@ OpenWrt поддерживает **flow offloading** — ускорение ма
 FLOWOFFLOAD=software
 ```
 
-**Рекомендация**: `software` — компромисс между скоростью и совместимостью. zapret сам добавляет exemption rules для flow offload, чтобы пакеты на нужных портах проходили через NFQUEUE.
+**Community-совет**: `software` — компромисс между скоростью и совместимостью. zapret2 при установке `software` или `hardware` создаёт цепочки exemption (`flow_offload_zapret`, `flow_offload_always`) в nftables, чтобы трафик на целевых портах проходил через NFQUEUE, а остальной — offloaded.
 
 #### Вариант 2: Отключить системный offload
 
@@ -66,15 +66,12 @@ uci commit firewall
 
 #### Вариант 3: Если zapret управляет offload сам
 
-Если `FLOWOFFLOAD=software` или `FLOWOFFLOAD=hardware` указаны в конфиге zapret, то zapret сам настраивает offload и добавляет exemption rules:
+Если `FLOWOFFLOAD=software` или `FLOWOFFLOAD=hardware` указаны в конфиге zapret2, он создаёт цепочки nftables для управления offload:
+- `flow_offload` — точка входа
+- `flow_offload_zapret` — содержит `return` rules для трафика, который должен пройти через NFQUEUE (exemption от offload)
+- `flow_offload_always` — всё остальное отправляется в `flow add @ft` (offloaded)
 
-```
-# Пример exemption rule, который zapret добавляет в nftables:
-add rule inet zapret flow_offload mark and != 0 tcp dport {80,443} ct original packets 1-9
-  ip daddr != @nozapret return comment "direct flow offloading exemption"
-```
-
-Это правило говорит: "для пакетов на порты 80/443 в первых 1-9 пакетах соединения — НЕ делать offload, пропустить через обычный путь (и NFQUEUE)".
+Таким образом трафик к целевым доменам/портам проходит обычный путь через nfqws2, а остальной трафик ускоряется через offload.
 
 ### Диагностика
 
@@ -112,18 +109,14 @@ Podkop — популярный инструмент точечной маршр
 ### Причина
 
 Zapret и Podkop оба создают nftables rules с mark-ами:
-- **Zapret**: `meta mark | 0x20000000`, `ct mark | 0x40000000`, queue to 200
+- **Zapret2**: `DESYNC_MARK=0x40000000` (meta mark для предотвращения петель), `DESYNC_MARK_POSTNAT=0x20000000` (для postnat-схемы), queue to 200
 - **Podkop**: свои mangle/proxy rules для перенаправления в sing-box
 
 Эти правила пересекаются: трафик может сначала попасть в zapret queue, потом в podkop redirect (или наоборот), что приводит к непредсказуемому поведению.
 
-### Официальная позиция Podkop
+### Совместимость с Podkop
 
-> Одновременное использование Podkop с zapret или youtubeunblock вызывает сбои, так как нарушает работу схемы FakeIP. Документация не содержит инструкций по настройке сторонних DPI-утилит совместно с Podkop.
-
-Ссылки:
-- Конфликты: https://podkop.net/docs/troubleshooting/
-- Диагностика FakeIP: https://podkop.net/docs/diagnostics/
+Podkop и zapret2 могут работать одновременно при правильном разделении трафика. На практике конфликты чаще всего возникают когда оба инструмента пытаются обработать один и тот же трафик. Рекомендуется разделение по доменам (см. ниже).
 
 ### Варианты решения
 
@@ -159,23 +152,15 @@ config section 'exclusion'
 3. Если FakeIP работает и всё открывается — можно не трогать
 4. Если что-то не работает:
    - Остановить zapret: `/etc/init.d/zapret stop` (или `/etc/init.d/zapret2 stop`)
-   - Перезапустить firewall: `fw4 restart`
+   - Перезапустить firewall: `/etc/init.d/firewall restart`
    - Проверить без zapret — если заработало, значит конфликт
    - Решать по варианту 1, 2 или 3
 
 ## ZeroBlock (Routerich): совместная работа
 
-ZeroBlock — инструмент для Routerich-роутеров (OpenWrt-based), который включает sing-box маршрутизацию и умеет управлять zapret/zapret2.
+> Информация о ZeroBlock получена из community-источников и не верифицирована по публичной документации.
 
-### Особенности
-
-- ZeroBlock в версии 0.7.0+ имеет встроенную **диагностику zapret/zapret2**: показывает NFQWS_OPT и strategy-секции с hostlist
-- ZeroBlock может автоматически загружать секции конфигурации zapret2 с сервера
-- DPI Check в ZeroBlock включает YouTube Stream Check (проверка Innertube API + скачивание 5MB видео), который управляет стратегией `rr_youtube` в zapret2
-
-### Рекомендация
-
-Связка ZeroBlock + zapret2 — штатная конфигурация на Routerich-роутерах. При использовании ZeroBlock следовать его документации по настройке zapret2, а не настраивать вручную.
+ZeroBlock — инструмент для Routerich-роутеров (OpenWrt-based), который включает sing-box маршрутизацию и умеет управлять zapret/zapret2. Связка ZeroBlock + zapret2 — штатная конфигурация на Routerich-роутерах. При использовании ZeroBlock следовать его документации по настройке zapret2.
 
 ## Общие рекомендации
 
@@ -191,13 +176,13 @@ ls -la /etc/rc.d/ | grep -E 'zapret|podkop|sing-box|firewall'
 
 ```bash
 # Все правила zapret
-nft list ruleset | grep -i zapret
+nft list ruleset | grep -i zapret2
 
 # Все правила с mark
 nft list ruleset | grep mark
 
 # Конкретная таблица zapret
-nft list table inet zapret
+nft list table inet zapret2
 ```
 
 ### "Всё упало" — экстренное восстановление
@@ -209,7 +194,7 @@ nft list table inet zapret
 /etc/init.d/zapret disable
 
 # Перезапустить firewall
-fw4 restart
+/etc/init.d/firewall restart
 
 # Проверить интернет
 ping -c 3 8.8.8.8
