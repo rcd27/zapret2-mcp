@@ -4,7 +4,7 @@ blockcheckw-version: v0.8.3
 tags: blockcheckw, scan, check, universal, status, benchmark, commands
 source: official-docs
 created: 2026-03-25
-updated: 2026-03-25
+updated: 2026-04-01
 ---
 
 # Команды blockcheckw
@@ -18,7 +18,7 @@ blockcheckw -w 256 scan -d rutracker.org [-p tls12] [--top 10] [--timeout 300]
 ```
 
 Параметры:
-- `-w N` — количество воркеров (по умолчанию определяется benchmark)
+- `-w N` — количество воркеров (по умолчанию 8)
 - `-d <domain>` — целевой домен
 - `-p <protocol>` — протокол: `http`, `tls12`, `tls13` (по умолчанию все)
 - `--top N` — показать топ-N результатов
@@ -37,7 +37,7 @@ blockcheckw check --from-file report_vanilla.txt -d rutracker.org [--take 10] [-
 
 Параметры:
 - `--from-file <file>` — файл с результатами scan (vanilla или JSON)
-- `--take N` — проверить топ-N стратегий
+- `--take N` — остановиться после нахождения N верифицированных стратегий на каждый протокол (0 = проверить все)
 - `--passes N` — количество проходов (по умолчанию 3)
 
 Логика:
@@ -57,7 +57,7 @@ blockcheckw -w 512 universal --domain-list blocked.txt --sample 5 [-p tls12]
 - `--domain-list <file>` — файл со списком доменов
 - `--sample N` — выборка из списка для тестирования
 
-Вывод: стратегии отсортированы по coverage (убывание), затем по simplicity (возрастание).
+Вывод: стратегии отсортированы по coverage (убывание).
 
 ## status — проверка доступности доменов
 
@@ -73,7 +73,7 @@ blockcheckw status --domain-list blocked.txt [--timeout 6]
 - **IP blocked** — TCP не работает → нужен VPN
 - **DNS failed** — проблема с DNS-резолвером
 
-Скорость: 1000+ доменов за ~30 секунд.
+Использует до 256 параллельных проб. На практике проверяет 1000+ доменов за ~30 секунд.
 
 ## benchmark — оптимизация количества воркеров
 
@@ -81,9 +81,9 @@ blockcheckw status --domain-list blocked.txt [--timeout 6]
 blockcheckw benchmark [-t 30] [-M 64] [-d rutracker.org] [-p tls12]
 ```
 
-Тестирует 8→16→32→64→... воркеров, измеряет throughput, определяет оптимальное количество для текущего железа.
+Тестирует воркеров степенями двойки (начиная от системного минимума, зависящего от числа ядер CPU), измеряет throughput и определяет оптимальное количество для текущего железа.
 
-На роутерах с 256MB RAM оптимально ~64 воркеров.
+OOM-guard: ~3MB на воркер. На роутерах с 256MB RAM это ограничивает максимум до ~60 воркеров.
 
 ## Пайплайн: scan → check
 

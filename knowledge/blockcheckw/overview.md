@@ -4,7 +4,7 @@ blockcheckw-version: v0.8.3
 tags: blockcheckw, scanner, strategy discovery, parallel, rust
 source: official-docs
 created: 2026-03-25
-updated: 2026-03-25
+updated: 2026-04-01
 ---
 
 # blockcheckw — быстрый сканер стратегий
@@ -15,7 +15,7 @@ blockcheckw (https://github.com/rcd27/blockcheckw) — высокопроизв�
 
 - **Скорость**: 100-150x быстрее blockcheck2.sh (~2 мин vs ~90 мин)
 - **Throughput**: ~150 стратегий/сек vs ~1 стратегия/сек
-- **Параллелизм**: до 1024 воркеров через nftables vmap dispatch (O(1) lookup)
+- **Параллелизм**: до 2048 воркеров через nftables vmap dispatch (O(1) lookup)
 - **TLS fingerprint**: rustls вместо curl/OpenSSL
 - **9 архитектур**: x86_64, x86, arm64, arm, mips, mipsel, mips64, ppc, riscv64
 - **16KB DPI detection**: обнаруживает DPI, который обрезает соединение после ~16KB данных
