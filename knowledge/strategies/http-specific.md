@@ -4,7 +4,7 @@ zapret2-version: v0.9.4.5
 tags: hostcase, domcase, methodeol, http, host header
 source: official-docs
 created: 2026-03-25
-updated: 2026-03-25
+updated: 2026-04-01
 ---
 
 # HTTP-специфичные стратегии
@@ -17,18 +17,19 @@ updated: 2026-03-25
 ```
 --hostcase
 ```
-Меняет регистр заголовка Host: (например, `Host:` → `hOsT:`). DPI ищет точное совпадение `Host:` и пропускает изменённый заголовок. Сервер обрабатывает header case-insensitively.
+Меняет регистр заголовка `Host:` → `host:` (lowercase). DPI ищет точное совпадение `Host:` и пропускает изменённый заголовок. Сервер обрабатывает header case-insensitively (RFC 7230).
 
 Lua-формат:
 ```
---lua-desync=http_hostcase:spell=hOsT
+--lua-desync=http_hostcase
 ```
+По умолчанию `spell=host` (lowercase). Можно задать произвольное написание из 4 символов: `--lua-desync=http_hostcase:spell=hOsT`.
 
 ### domcase
 ```
 --domcase
 ```
-Рандомизирует регистр доменного имени в Host-заголовке. DPI не может сопоставить домен.
+Чередует регистр символов доменного имени в Host-заголовке (напр. `example.com` → `ExAmPlE.cOm`). DPI не может сопоставить домен. Чередование детерминированное — нечётные позиции uppercase, чётные lowercase.
 
 Lua-формат:
 ```
@@ -39,15 +40,15 @@ Lua-формат:
 ```
 --methodeol
 ```
-Добавляет дополнительный перевод строки после HTTP-метода. Ломает парсинг DPI.
+Вставляет `\r\n` **перед** HTTP-методом (т.е. в начало запроса), сдвигая строку запроса. Для сохранения размера пакета крадёт 2 байта из значения User-Agent. Ломает парсинг DPI, который ожидает метод в начале пакета.
 
 ## Когда использовать
 
 HTTP — самый лёгкий протокол для bypass. Часто `--hostcase` в одиночку достаточно.
 
-Комбинация для надёжного HTTP bypass:
+Комбинация для надёжного HTTP bypass (zapret2 lua-синтаксис):
 ```
---hostcase --dpi-desync=split2 --dpi-desync-split-http-req=method+host
+--lua-desync=http_hostcase --lua-desync=multisplit:pos=method,host
 ```
 
 ## Ограничения
