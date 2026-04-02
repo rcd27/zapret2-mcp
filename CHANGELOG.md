@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.7.7](https://github.com/rcd27/zapret2-mcp/compare/v0.7.6...v0.7.7) (2026-04-02)
+
+
+### Bug Fixes
+
+* **ci-cd:** убран npm install, чтобы при релизе github-action не валился ([ed2b089](https://github.com/rcd27/zapret2-mcp/commit/ed2b08909d45a264ac08ed3a660a57f8ba54e307))
+
 ## [0.7.6](https://github.com/rcd27/zapret2-mcp/compare/v0.7.5...v0.7.6) (2026-04-02)
 
 
