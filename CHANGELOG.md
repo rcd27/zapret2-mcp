@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.7.8](https://github.com/rcd27/zapret2-mcp/compare/v0.7.7...v0.7.8) (2026-04-02)
+
+
+### Bug Fixes
+
+* **ci-cd:** вернул registry ([db7f031](https://github.com/rcd27/zapret2-mcp/commit/db7f031f1c694f8c5c9549de915938921be53e59))
+
 ## [0.7.7](https://github.com/rcd27/zapret2-mcp/compare/v0.7.6...v0.7.7) (2026-04-02)
 
 
