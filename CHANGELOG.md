@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.7.6](https://github.com/rcd27/zapret2-mcp/compare/v0.7.5...v0.7.6) (2026-04-02)
+
+
+### Bug Fixes
+
+* **multiple:** фикс ряда статей согласно аудиту ([34511e4](https://github.com/rcd27/zapret2-mcp/commit/34511e4157a2e66f0fcf31e5c3c8a2b2858c2fe4))
+
 ## [0.7.5](https://github.com/rcd27/zapret2-mcp/compare/v0.7.4...v0.7.5) (2026-04-01)
 
 
