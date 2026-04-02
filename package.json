@@ -1,6 +1,6 @@
 {
   "name": "zapret2-mcp",
-  "version": "0.7.5",
+  "version": "0.7.6",
   "description": "MCP knowledge server for zapret2 DPI bypass tool and blockcheckw strategy scanner",
   "license": "MIT",
   "author": "Stanislav Zemlyakov",
