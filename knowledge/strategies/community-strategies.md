@@ -4,7 +4,7 @@ zapret2-version: v0.9.4.5
 tags: community, strategies, circular, production, youtube, examples, multidisorder, multisplit, hostfakesplit, syndata, hostfakesplit, seqovl-pattern, googlevideo, three-stream
 source: community
 created: 2026-03-29
-updated: 2026-03-30
+updated: 2026-04-02
 ---
 
 # Community-стратегии (production-примеры)
@@ -23,7 +23,7 @@ updated: 2026-03-30
 ```
 --out-range=-s34228
 --payload=tls_client_hello
---in-range=-s5556 --lua-desync=circular:fails=3:maxtime=60
+--in-range=-s5556 --lua-desync=circular:fails=3:time=60
 --in-range=x
 --lua-desync=<action>:strategy=1
 --lua-desync=<action>:strategy=2
@@ -35,7 +35,7 @@ updated: 2026-03-30
 
 - `--out-range=-s34228` — обрабатывать исходящие пакеты в пределах ~25 TCP-пакетов
 - `--in-range=-s5556` — обрабатывать входящие до ~5 TCP-пакетов (для circular-детекции сбоев)
-- `--lua-desync=circular:fails=3:maxtime=60` — переключение стратегии после 3 неудач или 60 секунд
+- `--lua-desync=circular:fails=3:time=60` — переключение стратегии после 3 неудач; счётчик сбрасывается если последний сбой был более 60 секунд назад
 - `--in-range=x` — отключить обработку входящих для desync-действий (только для circular-мониторинга)
 - `:final` — маркер последней стратегии в цепочке circular
 
@@ -46,12 +46,12 @@ updated: 2026-03-30
 ```
 --out-range=-s34228
 --payload=tls_client_hello
---in-range=-s5556 --lua-desync=circular:fails=3:maxtime=60
+--in-range=-s5556 --lua-desync=circular:fails=3:time=60
 --in-range=x
 --lua-desync=multidisorder:pos=1,sniext+1,host+1,midsld-2,midsld,midsld+2,endhost-1:strategy=1
---lua-desync=fake:blob=fake_default_tls:badsum:tls_mod=sni=rzd.ru:repeat=8:strategy=1
+--lua-desync=fake:blob=fake_default_tls:badsum:tls_mod=sni=rzd.ru:repeats=8:strategy=1
 --lua-desync=multidisorder:pos=1,sniext+1,host+1,midsld-2,midsld,midsld+2,endhost-1:strategy=2
---lua-desync=fake:blob=blob_tls_clienthello_www_google_com:optional:tcp_seq=-10000:tcp_ack=-66000:badsum:tls_mod=rnd,dupsid,sni=rzd.ru:repeat=4:strategy=2:final
+--lua-desync=fake:blob=fake_default_tls:optional:tcp_seq=-10000:tcp_ack=-66000:badsum:tls_mod=rnd,dupsid,sni=rzd.ru:repeats=4:strategy=2:final
 ```
 
 Как работает:
@@ -68,7 +68,7 @@ updated: 2026-03-30
 ```
 --out-range=-s34228
 --payload=tls_client_hello
---in-range=-s5556 --lua-desync=circular:fails=3:maxtime=90
+--in-range=-s5556 --lua-desync=circular:fails=3:time=90
 --in-range=x
 --lua-desync=fake:blob=fake_default_tls:tcp_seq=1000000:repeats=1:strategy=1
 --lua-desync=multisplit:pos=2:strategy=1
@@ -91,7 +91,7 @@ updated: 2026-03-30
 ```
 --out-range=-s34228
 --payload=tls_client_hello
---in-range=-s5556 --lua-desync=circular:fails=3:maxtime=60
+--in-range=-s5556 --lua-desync=circular:fails=3:time=60
 --in-range=x
 --lua-desync=fake:blob=fake_default_tls:ip_ttl=2:repeats=1 --payload=empty --out-range=s1<d1 --lua-desync=pktmod:ip_ttl=1:strategy=1
 --lua-desync=fake:blob=fake_default_tls:ip_ttl=3:repeats=1 --payload=empty --out-range=s1<d1 --lua-desync=pktmod:ip_ttl=1:strategy=2
@@ -121,7 +121,7 @@ Circular перебирает TTL от 2 до 8, затем fallback на badsum
 
 ```
 --payload=tls_client_hello
---lua-desync=fake:blob=blob_tls_clienthello_escapefromtarkov_com:badsum:tcp_ts=-600000:repeats=6
+--lua-desync=fake:blob=fake_default_tls:badsum:tcp_ts=-600000:repeats=6
 --lua-desync=multidisorder:pos=1,sniext+1,host+1,midsld-2,midsld,midsld+2,endhost-1
 ```
 
@@ -153,7 +153,7 @@ Community-практика: YouTube требует **трёх отдельных
   --payload=tls_client_hello
   --hostlist-domains=googlevideo.com
   --out-range=-s34228
-  --lua-desync=fake:blob=blob_tls_clienthello_www_google_com:badsum:tls_mod=rnd,dupsid,sni=rzd.ru:repeats=4
+  --lua-desync=fake:blob=fake_default_tls:badsum:tls_mod=rnd,dupsid,sni=rzd.ru:repeats=4
   --lua-desync=multidisorder:pos=1,sniext+1,host+1,midsld-2,midsld,midsld+2,endhost-1
 
 --new
@@ -174,20 +174,11 @@ Community-практика: YouTube требует **трёх отдельных
 
 ```
 --payload=tls_client_hello
---lua-desync=syndata:blob=blob_syn_packet
+--lua-desync=syndata:blob=fake_default_tls
 --lua-desync=multisplit:pos=1,sld+1,endsld-2:seqovl=1
 ```
 
-Часто комбинируется с дублированием пакетов для надёжности:
-
-```
---payload=tls_client_hello
---lua-desync=syndata:blob=blob_syn_packet
---lua-desync=multisplit:pos=1,sld+1,endsld-2:seqovl=1:dup=2:dup_cutoff=3
-```
-
-Используется для googlevideo.com CDN, где стандартные fake-стратегии не проходят. Blob `syn_packet.bin` содержит
-специально сформированный SYN payload.
+Используется для googlevideo.com CDN, где стандартные fake-стратегии не проходят.
 
 ## Стратегия: hostfakesplit с российскими SNI
 
@@ -212,7 +203,7 @@ hostfakesplit подставляет в fake-часть split-а домен "б�
 
 ```
 --payload=tls_client_hello
---in-range=-s5556 --lua-desync=circular:fails=3:maxtime=60
+--in-range=-s5556 --lua-desync=circular:fails=3:time=60
 --in-range=x
 --lua-desync=hostfakesplit:host=rzd.ru:midhost=host-2:seqovl=sniext+3:badsum:strategy=1
 --lua-desync=hostfakesplit:host=ozon.ru:repeats=4:badsum:strategy=2:final
@@ -225,14 +216,10 @@ overlap "нормальный" российский ClientHello и пропус�
 
 ```
 --payload=tls_client_hello
---lua-desync=fakeddisorder:pos=10,midsld:seqovl=336:seqovl_pattern=blob_tls_clienthello_gosuslugi_ru:badsum
+--lua-desync=fakeddisorder:pos=10,midsld:seqovl=336:seqovl_pattern=fake_default_tls:badsum
 ```
 
-Эффективные blobs для seqovl-pattern:
-
-- `blob_tls_clienthello_gosuslugi_ru` — Госуслуги
-- `blob_tls_clienthello_www_google_com` — Google
-- `blob_tls_clienthello_activated` — активационные серверы
+Для seqovl-pattern используются стандартные blob'ы (`fake_default_tls`) или кастомные, загруженные из файла через `name:@path.bin`. Кастомные blob'ы с ClientHello от российских сайтов создаются через захват трафика — в стандартной поставке zapret2 их нет.
 
 Большие значения seqovl (336, 654, 681, 726) нужны для DPI, который анализирует паттерны в TCP window. Малые значения (
 1-2) — для статических DPI, которые не отслеживают TCP-состояние.
@@ -243,7 +230,7 @@ overlap "нормальный" российский ClientHello и пропус�
 
 ```
 --payload=tls_client_hello
---lua-desync=fake:blob=0x0F0F0F0F:tls_mod=rnd,dupsid,sni=fonts.google.com:badseq:repeats=4
+--lua-desync=fake:blob=0x0F0F0F0F:tls_mod=rnd,dupsid,sni=fonts.google.com:badsum:repeats=4
 --lua-desync=multidisorder:pos=7,sld+1
 ```
 
@@ -254,10 +241,10 @@ overlap "нормальный" российский ClientHello и пропус�
 - `sni=<domain>` — подмена SNI в fake на указанный домен
 - Комбинация `rnd,dupsid,sni=...` — максимальная маскировка
 
-Специфичные значения `badseq-increment`:
+Специфичные значения `tcp_seq`:
 
-- `0` — нулевой increment (пакет выглядит валидным для DPI, но отбрасывается сервером по другим причинам)
-- `2` — минимальный сдвиг
+- `0` — нулевой сдвиг (пакет выглядит валидным для DPI, но отбрасывается сервером по другим fooling-причинам)
+- `1000000` — стандартный сдвиг
 - `10000000` — огромный сдвиг, гарантированно вне TCP window
 
 Параметр `ip_id=zero` — обнуление IP Identification field. Обманывает DPI, которые используют IP ID для трекинга потока.

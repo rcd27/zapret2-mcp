@@ -4,7 +4,7 @@ zapret2-version: v0.9.4.5
 tags: circular-strategy, rotation, resilience, multi-strategy, profiles, autohostlist
 source: official-docs
 created: 2026-03-25
-updated: 2026-03-29
+updated: 2026-04-02
 ---
 
 # Оркестрация стратегий
@@ -16,15 +16,14 @@ Circular — автоматическая ротация между нескол
 ### Lua-формат
 
 ```
---lua-desync=circular:fails=2:maxtime=60
+--lua-desync=circular:fails=3:time=60
 ```
 
 Параметры:
-- `fails=N` — порог неудач для смены стратегии (по умолчанию 2)
-- `maxtime=N` — временное окно в секундах (по умолчанию 60)
-- `time=N` — альтернативное имя для `maxtime`
-- `retrans=N` — количество ретрансмиссий до считывания неудачи
-- `nld=N` — количество записей в NLD (network latency detection)
+- `fails=N` — порог неудач для смены стратегии (по умолчанию 3)
+- `time=N` — если последний сбой был раньше N секунд назад, счётчик сбрасывается (по умолчанию 60)
+- `retrans=N` — количество ретрансмиссий до считывания неудачи (параметр failure detector)
+- `nld=N` — количество записей NLD для hostkey генератора
 
 **Важно:** параметры circular должны быть без пробелов между стратегиями.
 
@@ -43,7 +42,7 @@ Circular — автоматическая ротация между нескол
 Каждый `--lua-desync` может быть привязан к конкретной стратегии ротации через `strategy=N`:
 
 ```
---lua-desync=circular:fails=2:maxtime=60
+--lua-desync=circular:fails=3:time=60
 --lua-desync=fake:blob=0x0F0F0F0F:tcp_seq=-10000:tcp_ack=-66000:badsum:strategy=1
 --lua-desync=multisplit:pos=2,sld:seqovl=620:strategy=1
 --lua-desync=fake:blob=0x00000000:tcp_ack=-66000:strategy=2
@@ -62,7 +61,7 @@ nfqws2 \
   --filter-tcp=443 \
   --filter-l7=tls \
   --out-range=-s34228 \
-  --in-range=-s5556 --lua-desync=circular:fails=2:maxtime=60 \
+  --in-range=-s5556 --lua-desync=circular:fails=3:time=60 \
   --in-range=x \
   --payload=tls_client_hello \
   --lua-desync=fake:blob=0x0F0F0F0F:tcp_seq=-10000:tcp_ack=-66000:badsum:strategy=1 \
@@ -71,17 +70,6 @@ nfqws2 \
   --lua-desync=multisplit:pos=2,endhost:strategy=2 \
   --lua-desync=multisplit:pos=1:seqovl=681:ip_id=zero:strategy=3
 ```
-
-### Предустановленные circular-конфигурации
-
-Пакет zapret2 включает предустановленные наборы:
-
-| Стратегия | Статус | Circular | Назначение |
-|---|---|---|---|
-| **youtube** | Включена по умолчанию | 14 вариантов | Оптимизирована для YouTube, Google Video |
-| **default** | Отключена | 8 вариантов | Универсальная для других сайтов |
-
-Стратегия `youtube` работает со списком `zapret_hosts_youtube.txt`. Стратегия `default` может быть активирована для обхода блокировок других ресурсов и использует список `zapret_hosts_user.txt` с исключениями из `zapret_hosts_user_exclude.txt`.
 
 ### Range-параметры в circular
 

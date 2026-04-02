@@ -4,14 +4,14 @@ zapret2-version: v0.9.4.5
 tags: troubleshooting, quic, udp, youtube, performance, disable-quic, podkop, browser
 source: community
 created: 2026-03-28
-updated: 2026-03-28
+updated: 2026-04-02
 ---
 
 # QUIC: главный незаметный враг YouTube на роутере
 
 ## Что такое QUIC и почему это проблема
 
-QUIC (HTTP/3) — протокол Google поверх UDP на порту 443. Современные браузеры, YouTube-приложения и другие Google-сервисы **предпочитают QUIC** вместо обычного HTTPS (TCP). Проблема в том, что:
+QUIC (HTTP/3) — транспортный протокол поверх UDP на порту 443, стандартизированный IETF (RFC 9000). Широко используется Google, Cloudflare, Meta и другими. Современные браузеры и приложения **предпочитают QUIC** вместо обычного HTTPS (TCP). Проблема в том, что:
 
 1. **ТСПУ умеет блокировать/замедлять QUIC** отдельно от HTTPS
 2. **Стратегии zapret2 для TCP не работают для QUIC** — это совершенно другой протокол
@@ -23,7 +23,7 @@ QUIC (HTTP/3) — протокол Google поверх UDP на порту 443. 
 - YouTube открывается, но видео бесконечно буферизуется или грузится в 480p
 - Сайты Google грузятся по 20 секунд
 - "На ПК работает, на телефоне нет" (разные приложения по-разному используют QUIC)
-- "В одном браузере работает, в другом нет" (Chrome включает QUIC по умолчанию, Firefox — нет)
+- "В одном браузере работает, в другом нет" (все основные браузеры включают QUIC по умолчанию, но поведение fallback различается)
 - Стратегия zapret2 для TCP работает (`curl` на роутере OK), но YouTube всё равно тормозит
 
 ### Почему это происходит
@@ -32,8 +32,8 @@ QUIC (HTTP/3) — протокол Google поверх UDP на порту 443. 
 Без QUIC:
   Браузер → TCP:443 → nfqws2 обрабатывает → DPI обманут → YouTube работает
 
-С QUIC:
-  Браузер → UDP:443 (QUIC) → nfqws2 НЕ обрабатывает (нет правил для UDP)
+С QUIC (без UDP-секции в конфиге):
+  Браузер → UDP:443 (QUIC) → nfqws2 НЕ обрабатывает (нет секции --filter-udp в конфиге)
                             → ТСПУ распознаёт QUIC → замедление/блокировка
                             → YouTube тормозит
 ```
@@ -119,33 +119,30 @@ NFQWS2_OPT="
 ```
 
 Но QUIC bypass **сложнее** TCP bypass:
-- QUIC зашифрован с первого пакета — нельзя манипулировать SNI
+- QUIC зашифрован с первого пакета — nfqws2 расшифровывает QUIC Initial для извлечения SNI, но манипулировать SNI бессмысленно (DPI тоже расшифровывает)
 - Основная стратегия — fake packets (отправить поддельный QUIC Initial)
 - Результат менее предсказуем чем для TCP
 - Не все ТСПУ одинаково обрабатывают QUIC
 
-### 3. Custom script quic4all (community)
+### 3. Отдельная QUIC-секция в конфиге zapret2
 
-Отдельный скрипт для desync всех QUIC-пакетов:
+В zapret2 QUIC-обработка добавляется как отдельная секция через `--new`:
 
-```bash
-# Скрипт quic4all для zapret2 custom.d/
-NFQWS_OPT_DESYNC_QUIC="${NFQWS_OPT_DESYNC_QUIC:---payload quic_initial --blob=quic_3:@/opt/zapret2/files/fake/quic_3.bin --lua-desync=fake:blob=quic_3}"
-
-alloc_dnum DNUM_QUIC4ALL
-alloc_qnum QNUM_QUIC4ALL
-
-zapret_custom_daemons()
-{
-  local opt="--qnum=$QNUM_QUIC4ALL $NFQWS_OPT_DESYNC_QUIC"
-  do_nfqws $1 $DNUM_QUIC4ALL "$opt"
-}
-zapret_custom_firewall_nft()
-{
-  local f="udp length >= 264 @ih,0,4 0xC @ih,8,32 0x00000001"
-  nft_fw_nfqws_post "$f" "$f" $QNUM_QUIC4ALL
-}
 ```
+NFQWS2_OPT="
+--name=https
+  --filter-tcp=443 --filter-l7=tls
+  --payload=tls_client_hello
+  --lua-desync=multisplit:pos=10:seqovl=1
+--new
+--name=quic
+  --filter-udp=443 --filter-l7=quic
+  --payload=quic_initial
+  --lua-desync=fake:blob=fake_default_quic:repeats=11
+"
+```
+
+Доступные blob-ы для QUIC fake: `fake_default_quic`, `quic_initial_www_google_com`, `quic_initial_facebook_com` и др. Количество repeats критично — UDP не гарантирует доставку, для агрессивного DPI может потребоваться 8-11 повторений.
 
 ## Частые ошибки
 
@@ -172,7 +169,7 @@ SmartTV могут использовать свои DNS-серверы и QUIC,
 ## Чеклист: YouTube тормозит
 
 1. [ ] Проверить: `curl -m 5 -I https://www.youtube.com` на роутере — если OK, стратегия TCP работает
-2. [ ] Проверить QUIC: `disable_quic` в podkop / `MODE_QUIC` в zapret
+2. [ ] Проверить QUIC: `disable_quic` в podkop / наличие секции `--filter-udp=443` в конфиге zapret2
 3. [ ] Если QUIC не отключён — отключить (самый быстрый фикс)
 4. [ ] Проверить Private DNS на Android-устройствах
 5. [ ] Проверить QUIC в браузере: `chrome://flags` → QUIC → Disabled

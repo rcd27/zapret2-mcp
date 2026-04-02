@@ -4,7 +4,7 @@ zapret2-version: v0.9.4.5
 tags: lua, scripting, lua-desync, zapret-lib, zapret-antidpi, zapret-auto, zapret-obfs, obfuscation, wireguard, ippxor, udp2icmp, synhide
 source: deepwiki/bol-van/zapret2, official-docs
 created: 2026-03-28
-updated: 2026-03-28
+updated: 2026-04-02
 ---
 
 # Lua Scripting System
@@ -34,7 +34,7 @@ C-демон (nfqws2/dvtws2/winws2):
 ### zapret-lib.lua (утилиты)
 
 Фундаментальные функции:
-- **Dissection**: `dissect_tls`, `dissect_http`, `dissect_url` — разбор протоколов
+- **Dissection**: `http_dissect_req`, `http_dissect_reply`, `dissect_url`, `tls_client_hello_mod` — разбор протоколов
 - **Реконструкция**: `rawsend_dissect_segmented`, `ipfrag2` — отправка модифицированных пакетов
 - **Модификация**: `apply_fooling` — применение fooling-параметров (TTL, checksums, etc.)
 

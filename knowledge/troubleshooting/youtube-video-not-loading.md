@@ -3,7 +3,7 @@ title: YouTube Opens But Video Does Not Load
 zapret2-version: v0.9.4.5
 tags: youtube, googlevideo, CDN, video, troubleshooting, badsum, aggressive, desktop, three-stream, quic
 created: 2026-03-29
-updated: 2026-03-30
+updated: 2026-04-02
 source: community, deepwiki/bol-van/zapret2
 ---
 
@@ -63,17 +63,17 @@ nft add rule inet zapret2 postrouting_hook udp dport 443 drop
 
 ### 3. Проверить hostlist
 
-googlevideo.com должен быть в hostlist:
+googlevideo.com должен быть в hostlist. Проверить через конфиг:
 
 ```bash
-grep -i googlevideo /opt/zapret2/zapret_hosts_user.txt
+# Если используется --hostlist-domains в NFQWS2_OPT:
+grep -i googlevideo /opt/zapret2/config
+
+# Если используется --hostlist с файлом:
+grep -r googlevideo /opt/zapret2/ipset/
 ```
 
-Если нет — добавить:
-
-```
-googlevideo.com
-```
+Если нет — добавить `googlevideo.com` в hostlist или в `--hostlist-domains`.
 
 ## Решение: агрессивная стратегия для YouTube
 
@@ -85,7 +85,7 @@ googlevideo.com
 --out-range=-s34228
 --payload=tls_client_hello
 --lua-desync=multidisorder:pos=1,sniext+1,host+1,midsld-2,midsld,midsld+2,endhost-1
---lua-desync=fake:blob=blob_tls_clienthello_www_google_com:optional:tcp_seq=-10000:tcp_ack=-66000:badsum:tls_mod=rnd,dupsid,sni=rzd.ru:repeat=4
+--lua-desync=fake:blob=fake_default_tls:optional:tcp_seq=-10000:tcp_ack=-66000:badsum:tls_mod=rnd,dupsid,sni=rzd.ru:repeat=4
 ```
 
 **Что делает:**
@@ -99,27 +99,27 @@ googlevideo.com
 
 ### Вариант 2: circular-стратегия с автоматическим перебором
 
-zapret2 включает предсобранный профиль `youtube` с 14 вариантами стратегий в circular-ротации. Если одна стратегия не
-работает — автоматически переключается на следующую.
+Можно настроить circular-оркестратор для автоматической ротации стратегий при отказе:
 
-Включение:
-
-```bash
-# В config
-MODE=nfqws2
-NFQWS2_ENABLE=1
-# Использовать профиль youtube
 ```
+--lua-desync=circular:fails=3:time=60
+--lua-desync=multidisorder:pos=1,sniext+1,host+1,midsld:strategy=1
+  --lua-desync=fake:blob=fake_default_tls:badsum:strategy=1
+--lua-desync=split2:pos=2:strategy=2
+  --lua-desync=fake:blob=fake_default_tls:tcp_md5:strategy=2
+```
+
+Если стратегия 1 набирает 3 неудачи — переключается на стратегию 2 и т.д.
 
 ### Вариант 3: найти стратегию через blockcheckw
 
 Самый надёжный подход — просканировать что работает именно для вашего провайдера:
 
 ```bash
-blockcheckw scan --target youtube.com --target googlevideo.com -j 128
+blockcheckw scan -d googlevideo.com -w 128
 ```
 
-Важно: сканировать именно `googlevideo.com`, а не только `youtube.com`.
+Важно: сканировать именно `googlevideo.com`, а не только `youtube.com`. Флаг `-d` задаёт домен, `-w` — число параллельных воркеров.
 
 ## Почему badsum
 
@@ -128,7 +128,7 @@ blockcheckw scan --target youtube.com --target googlevideo.com -j 128
 | Метод        | Механизм                                          | Для googlevideo                |
 |--------------|---------------------------------------------------|--------------------------------|
 | `badsum`     | Испорченная TCP checksum, NIC сервера отбрасывает | Работает в большинстве случаев |
-| `md5sig`     | Фальшивая TCP MD5 подпись, сервер отклоняет       | Надёжнее на Linux-серверах     |
+| `tcp_md5`    | Фальшивая TCP MD5 подпись, сервер отклоняет       | Надёжнее на Linux-серверах     |
 | `ip_autottl` | TTL = расстояние до DPI, пакет умирает до сервера | Зависит от топологии           |
 
 `badsum` — наиболее распространённый выбор для YouTube CDN в community-стратегиях.

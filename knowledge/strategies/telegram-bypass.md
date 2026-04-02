@@ -4,7 +4,7 @@ zapret2-version: v0.9.4.5
 tags: telegram, mtproto, ip-block, dpi, bypass, vpn, strategies
 source: community
 created: 2026-03-28
-updated: 2026-03-28
+updated: 2026-04-02
 ---
 
 # Telegram и zapret2: границы возможного
@@ -136,7 +136,7 @@ ping -c 3 149.154.167.50
 # Если timeout → IP заблокирован → нужен VPN
 
 # Проверить через blockcheckw (если доступен)
-blockcheckw status -d web.telegram.org
+echo "web.telegram.org" > /tmp/tg.txt && blockcheckw status --domain-list /tmp/tg.txt
 # "IP blocked" → VPN
 # "DPI blocked" → zapret2 может помочь
 

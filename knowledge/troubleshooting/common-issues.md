@@ -4,7 +4,7 @@ zapret2-version: v0.9.4.5
 tags: troubleshooting, diagnosis, problems, fixes
 source: official-docs
 created: 2026-03-25
-updated: 2026-03-29
+updated: 2026-04-02
 ---
 
 # Диагностика проблем zapret2
@@ -28,7 +28,9 @@ updated: 2026-03-29
 
 Быстрая проверка через blockcheckw:
 ```bash
-blockcheckw status -d example.com
+# создать файл с доменами для проверки
+echo "example.com" > /tmp/check.txt
+blockcheckw status --domain-list /tmp/check.txt
 ```
 Если "IP blocked" → VPN.
 
@@ -37,9 +39,9 @@ blockcheckw status -d example.com
 **Симптомы:** Connection reset, TLS handshake failure.
 **Причина:** Fake-пакеты доходят до сервера и ломают соединение.
 **Решение:** Сменить fooling метод:
-1. `md5sig` → самый надёжный на Linux-серверах
+1. `tcp_md5` → самый надёжный на Linux-серверах
 2. `badsum` → альтернатива (не работает если checksum offload выключен)
-3. `ip_autottl` → адаптивный TTL
+3. `ip_autottl` → адаптивный TTL (формат: `delta,min-max`)
 4. Не использовать фиксированный `ip_ttl` — хрупкий
 
 ### TTL-проблемы
@@ -54,7 +56,7 @@ blockcheckw status -d example.com
 **Решение:**
 1. Если перестала работать ночью — подождать 15-30 минут, возможна реконфигурация ТСПУ
 2. Запустить `blockcheckw scan` заново для поиска новой стратегии
-3. Для resilience: использовать `--lua-desync=circular:fails=3:maxtime=60` с 3+ стратегиями в ротации
+3. Для resilience: использовать `--lua-desync=circular:fails=3:time=60` с 3+ стратегиями в ротации
 
 Подробнее о ночных реконфигурациях: `tspu/night-reconfig.md`
 
@@ -75,8 +77,8 @@ modprobe nfnetlink_queue
 pgrep -f nfqws2
 
 # Проверить правила firewall
-nft list ruleset | grep -c zapret  # или:
-iptables -L -n | grep -c NFQUEUE
+nft list table inet zapret2  # или:
+iptables -L -n -t mangle | grep -c NFQUEUE
 
 # Проверить конфиг
 grep NFQWS2_ENABLE /opt/zapret2/config  # должно быть =1
@@ -132,7 +134,7 @@ systemctl status zapret2  # systemd
 /opt/zapret2/init.d/sysv/zapret2 status  # sysv
 
 # Правила firewall
-nft list ruleset | grep -i zapret
+nft list table inet zapret2
 iptables -L -n -t mangle | grep NFQUEUE
 
 # Конфигурация

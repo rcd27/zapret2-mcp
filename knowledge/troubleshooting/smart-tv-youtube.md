@@ -4,7 +4,7 @@ zapret2-version: v0.9.4.5
 tags: troubleshooting, smart-tv, youtube, tls, samsung, tizen, lg, webos, vidaa, platforms
 source: community
 created: 2026-03-28
-updated: 2026-04-01
+updated: 2026-04-02
 ---
 
 # Smart TV и YouTube: почему стратегия работает на ПК, но не на телевизоре
@@ -95,7 +95,7 @@ VIDAA, WebOS и Tizen агрессивно кешируют приложение
 --out-range=-s34228
 --payload=tls_client_hello
 --lua-desync=multidisorder:pos=1,sniext+1,host+1,midsld-2,midsld,midsld+2,endhost-1
---lua-desync=fake:blob=blob_tls_clienthello_www_google_com:optional:tcp_seq=-10000:tcp_ack=-66000:badsum:tls_mod=rnd,dupsid,sni=rzd.ru:repeat=4
+--lua-desync=fake:blob=fake_default_tls:optional:tcp_seq=-10000:tcp_ack=-66000:badsum:tls_mod=rnd,dupsid,sni=rzd.ru:repeat=4
 ```
 
 Принцип работы:
@@ -115,7 +115,7 @@ NFQWS2_OPT="
   --payload=tls_client_hello
   --hostlist-domains=youtube.com,googlevideo.com,youtubei.googleapis.com
   --lua-desync=multidisorder:pos=1,sniext+1,host+1,midsld-2,midsld,midsld+2,endhost-1
-  --lua-desync=fake:blob=blob_tls_clienthello_www_google_com:optional:tcp_seq=-10000:tcp_ack=-66000:badsum:tls_mod=rnd,dupsid,sni=rzd.ru:repeat=4
+  --lua-desync=fake:blob=fake_default_tls:optional:tcp_seq=-10000:tcp_ack=-66000:badsum:tls_mod=rnd,dupsid,sni=rzd.ru:repeat=4
 --new
 --name=other-https
   --filter-tcp=443 --filter-l7=tls
