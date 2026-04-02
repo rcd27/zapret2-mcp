@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.7.9](https://github.com/rcd27/zapret2-mcp/compare/v0.7.8...v0.7.9) (2026-04-02)
+
+
+### Bug Fixes
+
+* **ci-cd:** [@latest](https://github.com/latest) -&gt; [@11](https://github.com/11) в npm ([57347de](https://github.com/rcd27/zapret2-mcp/commit/57347de840f76bdd2578d414961a2e1bc86c5328))
+
 ## [0.7.8](https://github.com/rcd27/zapret2-mcp/compare/v0.7.7...v0.7.8) (2026-04-02)
 
 
