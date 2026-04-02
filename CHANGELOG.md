@@ -1,5 +1,20 @@
 # Changelog
 
+## [0.7.5](https://github.com/rcd27/zapret2-mcp/compare/v0.7.4...v0.7.5) (2026-04-01)
+
+
+### Bug Fixes
+
+* **blockcheckw:** правки с ссылкой на источник ([bed1603](https://github.com/rcd27/zapret2-mcp/commit/bed160349e392eb17a0d8e1ce50d01009794af09))
+* **dpi-types:** корректный lua-синтаксис, ipfrag2 заменён на multidisorder в качестве рекомендации, удалён несуществующий параметр ([b2f7921](https://github.com/rcd27/zapret2-mcp/commit/b2f79214485db04b4c5f5c5cbcfcd1b5574cbb2d))
+* **find-strategy:** убраны рефернсы к V1 стратегиям ([fcf7325](https://github.com/rcd27/zapret2-mcp/commit/fcf73253c4f8193b31cd8e74c57cd4c858548f01))
+* **http-specific:** убраны галлюцинации и ошибки нэйминга ([dbb0720](https://github.com/rcd27/zapret2-mcp/commit/dbb0720f7e7e06bd6eb3eeaba39f36dfe524e835))
+* **nfqws2-options:** выпилены ссылки на nfqws, добавлены fooling параметры и payload types ([7501b75](https://github.com/rcd27/zapret2-mcp/commit/7501b75fe1bbd4065fe4c9780fc400c66e53dea7))
+* **setup:** DoH/DoT в качестве prereq, остальные тревоания к системе ([4776237](https://github.com/rcd27/zapret2-mcp/commit/477623779c7d372213d57dbfe522ec8e06912fb5))
+* **tcp-segmentation:** убран несуществующий параметр, правки по claims ([7c1c945](https://github.com/rcd27/zapret2-mcp/commit/7c1c94548e757897f0205998a4e7d59f4df7121f))
+* **tizen:** правки насчёт отсутствия альтернатив YouTube на Tizen ([6513205](https://github.com/rcd27/zapret2-mcp/commit/6513205b0323a1c7ce8d8e21e69ff5ea3c04d1d7))
+* **zapret2-config:** мелкие правки по конфигу zapret2 ([d40c4cf](https://github.com/rcd27/zapret2-mcp/commit/d40c4cf5faf8debe7fc429378af60f2a43dae9e1))
+
 ## [0.7.4](https://github.com/rcd27/zapret2-mcp/compare/v0.7.3...v0.7.4) (2026-03-30)
 
 
