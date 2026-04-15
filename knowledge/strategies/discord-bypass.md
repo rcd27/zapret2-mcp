@@ -4,7 +4,7 @@ zapret2-version: v0.9.4.5
 tags: discord, stun, voip, voice, udp, strategies, bypass, cloudflare-ports
 source: community
 created: 2026-03-28
-updated: 2026-03-30
+updated: 2026-04-15
 ---
 
 # Discord bypass через zapret2
@@ -36,15 +36,6 @@ Discord блокируется в России на нескольких уро�
   --payload=tls_client_hello
   --hostlist-domains=discord.com,discord.gg,discord.media,discordapp.com,discordapp.net
   --lua-desync=multidisorder:pos=2
-```
-
-**zapret v1:**
-
-```
---filter-tcp=443
-  --hostlist=/opt/zapret/ipset/zapret-hosts-discord.txt
-  --dpi-desync=fake --dpi-desync-fake-tls-mod=none --dpi-desync-repeats=6
-  --dpi-desync-fooling=badseq --dpi-desync-badseq-increment=2
 ```
 
 ### 2. Discord Updates (updates.discord.com)
@@ -104,19 +95,8 @@ NFQWS_PORTS_UDP=443,50000-50099
   --lua-desync=fake:blob=0x00:repeats=6
 ```
 
-**zapret v1:**
-
-```
---filter-udp=50000-50099
-  --filter-l7=discord,stun
-  --dpi-desync=fake
-  --dpi-desync-fake-discord=/opt/zapret/files/fake/quic_initial_www_google_com.bin
-  --dpi-desync-fake-stun=/opt/zapret/files/fake/quic_initial_www_google_com.bin
-  --dpi-desync-repeats=6
-```
-
-Community-практика: для fake-discord и fake-stun используется `quic_initial_www_google_com.bin` — DPI видит "легитимный"
-Google QUIC. Стандартный нулевой fake (`blob=0x00`) тоже работает, но менее надёжен на агрессивных DPI.
+Community-практика: вместо нулевого fake (`blob=0x00`) можно использовать `blob=quic_initial_www_google_com` — DPI видит
+"легитимный" Google QUIC. Нулевой blob тоже работает, но менее надёжен на агрессивных DPI.
 
 С версии zapret v70.6 — нативное определение протоколов Discord IP Discovery и STUN. До этой версии использовался
 custom.d скрипт `50-discord`.
@@ -126,9 +106,10 @@ custom.d скрипт `50-discord`.
 Для игровых активностей Discord дополнительно:
 
 ```
---filter-udp=19294-19344
+--name=discord-games
+  --filter-udp=19294-19344
   --filter-l7=discord,stun
-  --dpi-desync=fake
+  --lua-desync=fake:blob=0x00:repeats=6
 ```
 
 ## Домены Discord
@@ -223,14 +204,14 @@ NFQWS2_OPT="
 `discord,stun` — голос не заработает.
 
 **Решение:** добавить `NFQWS_PORTS_UDP=443,50000-50099` и стратегию
-`--filter-udp=50000-50099 --filter-l7=discord,stun --dpi-desync=fake`.
+`--filter-udp=50000-50099 --filter-l7=discord,stun --lua-desync=fake:blob=0x00:repeats=6`.
 
 ### "Discord работал и перестал"
 
 DPI обновился. Попробовать:
 
 1. Сменить стратегию (другой fooling метод)
-2. Запустить blockcheck2 для `discord.com`
+2. Запустить blockcheckw для `discord.com`
 3. Попробовать circular-стратегию
 
 ### "zapret2 режет исходящую скорость"
@@ -250,11 +231,11 @@ NFQWS_PORTS_TCP=80,443,2053,2083,2087,2096,6695-6710,8443
 
 Пакет zapret2 включает готовый custom-скрипт:
 
-| Скрипт                | Назначение                     |
-|-----------------------|--------------------------------|
-| `50-discord_media.sh` | Голосовые/видео каналы Discord |
-| `50-quic4all.sh`      | QUIC для всего трафика         |
-| `50-stun4all.sh`      | STUN/WebRTC                    |
+| Скрипт             | Назначение                     |
+|--------------------|--------------------------------|
+| `50-discord-media` | Голосовые/видео каналы Discord |
+| `50-quic4all`      | QUIC для всего трафика         |
+| `50-stun4all`      | STUN/WebRTC                    |
 
 Включение через UCI:
 
