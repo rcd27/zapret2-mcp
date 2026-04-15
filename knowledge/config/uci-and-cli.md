@@ -1,13 +1,13 @@
 ---
-title: UCI конфигурация и CLI-утилита zapret2
+title: UCI конфигурация и управление сервисом zapret2
 zapret2-version: v0.9.4.5
 tags: uci, cli, config, openwrt, init, service, management
 source: official-docs
 created: 2026-03-28
-updated: 2026-03-28
+updated: 2026-04-15
 ---
 
-# UCI конфигурация и CLI-утилита zapret2
+# UCI конфигурация и управление сервисом zapret2
 
 ## Структура `/etc/config/zapret2`
 
@@ -47,8 +47,8 @@ config list 'list_hosts_youtube'
 ### Lua скрипты (luascript)
 
 ```
-config luascript 'lua_zapret_wgobfs'
-    option path '/opt/zapret2/lua/zapret-wgobfs.lua'
+config luascript 'lua_zapret_obfs'
+    option path '/opt/zapret2/lua/zapret-obfs.lua'
     option enabled '0'
 ```
 
@@ -108,59 +108,33 @@ uci commit zapret2
 /etc/init.d/zapret2 restart
 ```
 
-## CLI-утилита `zapret2`
-
-```bash
-zapret2 status      # Статус демона nfqws2
-zapret2 genconfig   # Сгенерировать конфиг из UCI
-zapret2 dump        # Показать загруженную конфигурацию
-zapret2 reset       # Сбросить конфигурацию к дефолтам
-zapret2 --help      # Справка
-```
-
-### Примеры вывода
-
-```bash
-$ zapret2 status
-zapret2 is running
-  Instances: 4
-  First PID: 1234
-  Strategies: 1 enabled
-
-$ zapret2 dump
-Main configuration:
-  enabled: 1
-  desync_mark: 0x40000000
-  qnum: 300
-
-Strategies:
-  youtube (enabled):
-    port: 443
-    protocol: tcp
-    filter_l7: tls
-    hostlist: list_hosts_youtube
-```
-
 ## Управление сервисом (init-скрипт)
 
 ```bash
-/etc/init.d/zapret2 start      # Запустить
+# Стандартные procd-команды
+/etc/init.d/zapret2 start      # Запустить (демоны + firewall)
 /etc/init.d/zapret2 stop       # Остановить
-/etc/init.d/zapret2 restart    # Полный перезапуск демона
-/etc/init.d/zapret2 reload     # Перезагрузить хостлисты (SIGHUP)
-/etc/init.d/zapret2 status     # Показать статус
+/etc/init.d/zapret2 restart    # Полный перезапуск
 /etc/init.d/zapret2 enable     # Включить автозапуск
 /etc/init.d/zapret2 disable    # Отключить автозапуск
+
+# Дополнительные команды zapret2
+/etc/init.d/zapret2 start_daemons    # Запустить только демоны nfqws2
+/etc/init.d/zapret2 stop_daemons     # Остановить только демоны
+/etc/init.d/zapret2 restart_daemons  # Перезапустить только демоны
+/etc/init.d/zapret2 start_fw         # Применить правила firewall (nftables)
+/etc/init.d/zapret2 stop_fw          # Убрать правила firewall
+/etc/init.d/zapret2 restart_fw       # Пересоздать правила firewall
+/etc/init.d/zapret2 reload_ifsets    # Обновить списки интерфейсов (nftables)
+/etc/init.d/zapret2 list_ifsets      # Показать списки интерфейсов
+/etc/init.d/zapret2 list_table       # Показать nft-таблицу zapret2
 ```
 
-### reload vs restart
+### restart vs restart_daemons
 
-- **reload** — отправляет SIGHUP демону nfqws2. Перезагружает **только хостлисты и ipset-ы** без остановки процесса. Активные соединения не прерываются.
-- **restart** — полностью останавливает и запускает демон. Применяет **все изменения** включая стратегии. Активные соединения прерываются.
-
-**Когда что использовать:**
-- Изменили список доменов → `reload`
-- Изменили стратегию или параметры → `restart`
+- **restart** — полностью останавливает и запускает демоны + firewall. Применяет **все изменения**. Активные соединения прерываются.
+- **restart_daemons** — перезапускает только процессы nfqws2 без пересоздания правил firewall. Быстрее, если правила не менялись.
+- **reload_ifsets** — обновляет только nftables-наборы интерфейсов (НЕ хостлисты).
 
 ## Проверка работы
 
@@ -194,7 +168,7 @@ logread -f | grep -E "(zapret2|nfqws2)"
 tail -f /tmp/zapret2/main.log
 
 # Логи custom-скриптов
-tail -f /tmp/zapret2/50-discord_media.log
+tail -f /tmp/zapret2/50-discord-media.log
 ```
 
 **Примечание:** логи в `/tmp/zapret2/` создаются только при включённом Debug-режиме.
@@ -232,16 +206,13 @@ uci commit zapret2
 │   ├── zapret-antidpi.lua   # Базовый (всегда загружен)
 │   ├── zapret-auto.lua      # Базовый (всегда загружен)
 │   ├── zapret-obfs.lua      # Дополнительный
-│   ├── zapret-wgobfs.lua    # Дополнительный
 │   ├── zapret-pcap.lua      # Дополнительный
 │   └── zapret-tests.lua     # Дополнительный
 └── nfq2/
-    ├── nfqws2.aarch64
-    └── nfqws2.x86_64
+    └── nfqws2               # Бинарник (устанавливается под целевую архитектуру)
 
 /etc/config/zapret2            # UCI конфигурация
-/etc/init.d/zapret2            # Init-скрипт
-/usr/bin/zapret2               # CLI-утилита
+/etc/init.d/zapret2            # Init-скрипт (procd)
 ```
 
 ## Lua скрипты
@@ -260,8 +231,7 @@ uci commit zapret2
 
 | Скрипт | Назначение |
 |---|---|
-| `zapret-obfs.lua` | Обфускация трафика |
-| `zapret-wgobfs.lua` | Обфускация WireGuard |
+| `zapret-obfs.lua` | Обфускация трафика (WireGuard и др.) |
 | `zapret-pcap.lua` | Захват пакетов в формате pcap |
 | `zapret-tests.lua` | Тестирование Lua-интерфейса nfqws2 |
 
@@ -272,13 +242,13 @@ uci commit zapret2
 uci show zapret2 | grep luascript
 
 # Включить скрипт
-uci set zapret2.lua_zapret_wgobfs.enabled='1'
+uci set zapret2.lua_zapret_obfs.enabled='1'
 uci commit zapret2
 /etc/init.d/zapret2 restart
 
 # Проверить что скрипт загружен
 pgrep -a nfqws2 | grep lua-init
-# Должен содержать: --lua-init=@/opt/zapret2/lua/zapret-wgobfs.lua
+# Должен содержать: --lua-init=@/opt/zapret2/lua/zapret-obfs.lua
 ```
 
 ### Добавление своих Lua скриптов
