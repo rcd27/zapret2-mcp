@@ -3,13 +3,14 @@ title: Блобы (blobs) — бинарные данные для fake-паке
 zapret2-version: v0.9.4.5
 tags: blob, fake, tls_mod, fake_default_tls, fake_default_http, fake_default_quic, бинарные данные
 created: 2026-03-29
-updated: 2026-03-29
+updated: 2026-04-15
 source: community
 ---
 
 # Блобы (Blobs) в Zapret2
 
-**Блоб (blob)** — это переменная Lua типа `string`, содержащая блок **двоичных данных** произвольной длины (от 1 байта до гигабайтов). Блобы используются для хранения fake-пакетов и других бинарных данных.
+**Блоб (blob)** — это переменная Lua типа `string`, содержащая блок **двоичных данных** произвольной длины (от 1 байта
+до гигабайтов). Блобы используются для хранения fake-пакетов и других бинарных данных.
 
 ---
 
@@ -22,6 +23,7 @@ nfqws2 автоматически инициализирует **3 станда�
 **Что это:** TLS Client Hello пакет с SNI `www.microsoft.com`
 
 **Содержимое:**
+
 - TLS версия: 1.2/1.3
 - Cipher suites: современные шифры
 - SNI: `www.microsoft.com` (по умолчанию)
@@ -29,15 +31,17 @@ nfqws2 автоматически инициализирует **3 станда�
 - Расширения: supported_groups, signature_algorithms, key_share и др.
 
 **Использование:**
+
 ```bash
 --payload=tls_client_hello --lua-desync=fake:blob=fake_default_tls
 ```
 
-### 2. **`fake_default_http`** (227 байт)
+### 2. **`fake_default_http`** (263 байт)
 
 **Что это:** HTTP GET запрос
 
 **Содержимое:**
+
 ```http
 GET / HTTP/1.1
 Host: www.iana.org
@@ -47,6 +51,7 @@ Accept-Encoding: gzip, deflate, br
 ```
 
 **Использование:**
+
 ```bash
 --payload=http_req --lua-desync=fake:blob=fake_default_http
 ```
@@ -56,10 +61,12 @@ Accept-Encoding: gzip, deflate, br
 **Что это:** QUIC Initial пакет (минимальный валидный пакет)
 
 **Содержимое:**
+
 - Первый байт: `0x40` (QUIC long header)
 - Остальное: нули (620 байт всего)
 
 **Использование:**
+
 ```bash
 --payload=quic_initial --lua-desync=fake:blob=fake_default_quic
 ```
@@ -73,28 +80,34 @@ Accept-Encoding: gzip, deflate, br
 ### Доступные модификации:
 
 #### 1. **`rnd`** - Рандомизация поля "random"
+
 - Заменяет 32-байтовое поле "random" в TLS handshake на случайные данные
 - Делает каждый fake-пакет уникальным
 
 #### 2. **`rndsni`** - Случайный SNI
+
 - Генерирует случайное доменное имя
 - Заменяет SNI в TLS расширении
 - Пример: `www.microsoft.com` → `a7b3c.com`
 
 #### 3. **`sni=<домен>`** - Установить конкретный SNI
+
 - Заменяет SNI на указанный домен
 - Пример: `sni=www.google.com`
 
 #### 4. **`dupsid`** - Дублировать Session ID
+
 - Копирует Session ID из **реального** TLS handshake (из `payload`)
 - Требует третий параметр — реальный payload пакета
 - Делает fake более похожим на настоящий
 
 #### 5. **`padencap`** - Padding encapsulation
+
 - Добавляет padding в TLS расширения
 - Увеличивает размер пакета
 
 #### 6. **`none`** - Без модификаций
+
 - Явно указывает, что модификации не нужны
 
 ---
@@ -156,11 +169,13 @@ Accept-Encoding: gzip, deflate, br
 ## 🔍 **Как работает `tls_mod`**
 
 ### Синтаксис:
+
 ```lua
 tls_mod(blob, modlist, [payload])
 ```
 
 **Параметры:**
+
 1. `blob` - исходный TLS Client Hello (строка с бинарными данными)
 2. `modlist` - список модификаций через запятую
 3. `payload` (опционально) - реальный TLS handshake для копирования Session ID
@@ -208,8 +223,8 @@ nfqws2 \
 1. **Стандартные блобы** инициализируются автоматически — не нужно их загружать
 2. **`fake_default_tls`** содержит SNI `www.microsoft.com` по умолчанию
 3. **`tls_mod`** может применяться:
-   - **Один раз при старте** через `--lua-init`
-   - **На лету** при каждой отправке через параметр `tls_mod=` в desync функции
+    - **Один раз при старте** через `--lua-init`
+    - **На лету** при каждой отправке через параметр `tls_mod=` в desync функции
 4. **`dupsid`** требует реальный payload — работает только в функциях `fake`, `syndata` и подобных
 5. **Модификации комбинируются** через запятую: `rnd,rndsni,dupsid,sni=domain.com`
 

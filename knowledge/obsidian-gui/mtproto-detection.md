@@ -3,7 +3,7 @@ title: MTProto — обнаружение и обход блокировки Tel
 zapret2-version: v0.9.4.5
 tags: mtproto, telegram, detection, filter-l7, ipset, шифрование
 created: 2026-03-29
-updated: 2026-03-29
+updated: 2026-04-15
 source: community
 ---
 
@@ -60,12 +60,12 @@ bool IsMTProto(const uint8_t *data, size_t len)
 
 **MTProto НЕ содержит hostname!** Это значит:
 
-| Фильтрация | Работает? |
-|------------|-----------|
-| `--filter-l7=mtproto` | ✅ Да |
-| `--payload=mtproto_initial` | ✅ Да |
-| `--hostlist=...` | ❌ **Нет** (нет hostname) |
-| `--ipset=telegram_ips.txt` | ✅ Да |
+| Фильтрация                  | Работает?                |
+|-----------------------------|--------------------------|
+| `--filter-l7=mtproto`       | ✅ Да                     |
+| `--payload=mtproto_initial` | ✅ Да                     |
+| `--hostlist=...`            | ❌ **Нет** (нет hostname) |
+| `--ipset=telegram_ips.txt`  | ✅ Да                     |
 
 ## Пример использования
 
@@ -107,6 +107,7 @@ hostlist бесполезен — только ipset или фильтрация
 ## Когда MTProto → unknown
 
 **Условие детекции:**
+
 ```c
 (ctrack->pos.seq_last - ctrack->pos.seq0) == 1
 ```
@@ -129,13 +130,13 @@ TCP соединение MTProto:
 
 ## Разница l7proto vs payload
 
-| Пакет | `--filter-l7` (proto) | `--payload` |
-|-------|----------------------|-------------|
-| SYN, SYN+ACK, ACK | unknown | empty |
-| **1-й пакет с данными** | **mtproto** | **mtproto_initial** |
-| 2-й пакет с данными | mtproto | **unknown** |
-| 3-й пакет с данными | mtproto | **unknown** |
-| ... | mtproto | **unknown** |
+| Пакет                   | `--filter-l7` (proto) | `--payload`         |
+|-------------------------|-----------------------|---------------------|
+| SYN, SYN+ACK, ACK       | unknown               | empty               |
+| **1-й пакет с данными** | **mtproto**           | **mtproto_initial** |
+| 2-й пакет с данными     | mtproto               | **unknown**         |
+| 3-й пакет с данными     | mtproto               | **unknown**         |
+| ...                     | mtproto               | **unknown**         |
 
 **l7proto** (протокол соединения) сохраняется в conntrack и остаётся `mtproto` для всего соединения.
 
@@ -177,6 +178,7 @@ static bool parse_l7p_list(char *opt, uint64_t *l7p)
 ```
 
 Это сработает на:
+
 - Первом пакете MTProto (`mtproto_initial`)
 - Всех последующих пакетах (`unknown`)
 
@@ -233,15 +235,16 @@ nfqws2 \
 
 **Почему так:**
 
-| Вариант | Плюсы | Минусы |
-|---------|-------|--------|
-| `payload=mtproto_initial` | Минимум нагрузки, точно по цели | — |
-| `payload=mtproto_initial,unknown` | Охватывает всё | Лишняя обработка зашифрованных пакетов |
-| `payload=all` | Проще написать | Обрабатывает даже пустые ACK |
+| Вариант                           | Плюсы                           | Минусы                                 |
+|-----------------------------------|---------------------------------|----------------------------------------|
+| `payload=mtproto_initial`         | Минимум нагрузки, точно по цели | —                                      |
+| `payload=mtproto_initial,unknown` | Охватывает всё                  | Лишняя обработка зашифрованных пакетов |
+| `payload=all`                     | Проще написать                  | Обрабатывает даже пустые ACK           |
 
 ### Почему unknown не нужен
 
 После первого пакета MTProto2:
+
 - Трафик **полностью зашифрован**
 - Выглядит как **случайные данные**
 - DPI **не может** его отличить от обычного шума
@@ -268,17 +271,23 @@ nfqws2 \
 **TL;DR:** Используй `--payload=mtproto_initial` — этого достаточно в 99% случаев.
 
 ## Не используйте TLS
-Telegram API (api.telegram.org) использует обычный HTTPS/TLS, поэтому is_valid_tls_client_hello корректно определяет его как TLS. Но:
-1. seqovl с подменой SNI ломает соединение с Telegram - серверы Telegram могут проверять SNI или не поддерживать TCP overlap
+
+Telegram API (api.telegram.org) использует обычный HTTPS/TLS, поэтому is_valid_tls_client_hello корректно определяет его
+как TLS. Но:
+
+1. seqovl с подменой SNI ломает соединение с Telegram - серверы Telegram могут проверять SNI или не поддерживать TCP
+   overlap
 2. Пакет дропается (drop) после отправки модифицированных частей, но сервер не принимает их
 
 payload_check(desync) пропускает трафик если в конфиге payload=known (все известные типы)
 
 Для non-TLS fallback по умолчанию = "pattern" → применяется seqovl с raw TLS blob → ломает MTProto и другие протоколы
 
-MTProto не TLS, функция это видит, но fallback=pattern всё равно добавляет TLS blob перед MTProto пакетом → сервер Telegram не понимает такой мусор → соединение разрывается.
+MTProto не TLS, функция это видит, но fallback=pattern всё равно добавляет TLS blob перед MTProto пакетом → сервер
+Telegram не понимает такой мусор → соединение разрывается.
 
 ## Глобальный фильтр
+
 Давайте посмотрим, какие фильтры (--wf) поддерживаются в zapret и как они работают с MTProto.
 
 [10 tools called]
@@ -287,7 +296,8 @@ MTProto не TLS, функция это видит, но fallback=pattern всё
 
 ## Захват MTProto пакетов
 
-Для MTProto **нельзя создать простой WinDivert фильтр** по пейлоаду, потому что детекция MTProto требует **AES расшифровки**:
+Для MTProto **нельзя создать простой WinDivert фильтр** по пейлоаду, потому что детекция MTProto требует **AES
+расшифровки**:
 
 ```1423:1445:nfq2/protocol.c
 bool IsMTProto(const uint8_t *data, size_t len)
@@ -316,6 +326,7 @@ bool IsMTProto(const uint8_t *data, size_t len)
 ```
 
 **Поэтому нужно:**
+
 1. Перехватывать весь TCP на порту 443: `--wf-tcp-out=443`
 2. Фильтровать на уровне nfqws: `--filter-l7=mtproto`
 3. Использовать `--payload=mtproto_initial` для реакции только на первый пакет
@@ -324,24 +335,27 @@ bool IsMTProto(const uint8_t *data, size_t len)
 
 ## Можно ли применять `dupsid` и TLS методы к MTProto?
 
-**Нет, нельзя!** 
+**Нет, нельзя!**
 
-`dupsid` — это **TLS-специфичная модификация**, которая копирует Session ID из реального TLS ClientHello в фейк. MTProto — это **собственный зашифрованный протокол Telegram** (AES-CTR), а не TLS. Поэтому:
+`dupsid` — это **TLS-специфичная модификация**, которая копирует Session ID из реального TLS ClientHello в фейк.
+MTProto — это **собственный зашифрованный протокол Telegram** (AES-CTR), а не TLS. Поэтому:
 
 - ❌ `tls_mod=dupsid` — не работает
-- ❌ `tls_mod=rnd,rndsni` — не работает  
+- ❌ `tls_mod=rnd,rndsni` — не работает
 - ❌ `blob=fake_default_tls` — бесполезен
 
 **Что применимо для MTProto:**
+
 - ✅ `split`/`multisplit` — разбиение пакетов
-- ✅ `disorder`/`multidisorder` — переупорядочивание  
+- ✅ `disorder`/`multidisorder` — переупорядочивание
 - ✅ `fake` с generic данными (`blob=0x00000000`)
 - ✅ TTL трюки (`ip_ttl`, `ip_autottl`)
 - ✅ `tcp_md5`, `badseq` и другие TCP fooling методы
 
 **Пример для MTProto:**
+
 ```bash
-winws --wf-tcp-out=443 \
+winws2 --wf-tcp-out=443 \
   --filter-l7=mtproto \
   --payload=mtproto_initial \
   --lua-desync=fake:blob=0x00000000:ip_ttl=5:tcp_md5 \
@@ -354,7 +368,8 @@ MTProto детектится только на **первом TCP пакете �
 
 ## Логика работы
 
-**DPI определяет протокол по первым пакетам.** Если DPI распознал MTProto в начале соединения — он блокирует/ресетит всё соединение. Если не распознал — пропускает дальше.
+**DPI определяет протокол по первым пакетам.** Если DPI распознал MTProto в начале соединения — он блокирует/ресетит всё
+соединение. Если не распознал — пропускает дальше.
 
 Поэтому **"дурилка" нужна только на первых пакетах**:
 
@@ -364,14 +379,15 @@ MTProto детектится только на **первом TCP пакете �
          ТУТ нужен desync
 ```
 
-После успешного "пробития" первого пакета, DPI уже потерял контекст и не понимает, что это MTProto. Дальнейший трафик идёт без обработки.
+После успешного "пробития" первого пакета, DPI уже потерял контекст и не понимает, что это MTProto. Дальнейший трафик
+идёт без обработки.
 
 ## Как это реализовано
 
 Параметр `--out-range` ограничивает диапазон обработки:
 
 ```bash
-winws --wf-tcp-out=443 \
+winws2 --wf-tcp-out=443 \
   --filter-l7=mtproto \
   --out-range=-d10 \
   --payload=mtproto_initial \
@@ -384,12 +400,13 @@ winws --wf-tcp-out=443 \
 
 ## Итог
 
-| Пакет | Обработка |
-|-------|-----------|
+| Пакет                 | Обработка                         |
+|-----------------------|-----------------------------------|
 | 1-й (mtproto_initial) | ✅ Применяется fake/split/disorder |
-| 2-й и далее | ❌ Пропускается без изменений |
+| 2-й и далее           | ❌ Пропускается без изменений      |
 
-**Это нормально и правильно** — вся суть в том, чтобы сбить DPI на этапе детекции протокола. После этого соединение уже установлено и DPI не знает, что блокировать.
+**Это нормально и правильно** — вся суть в том, чтобы сбить DPI на этапе детекции протокола. После этого соединение уже
+установлено и DPI не знает, что блокировать.
 
 Аналогично работает и для TLS (`tls_client_hello`), и для QUIC (`quic_initial`) — обрабатывается только инициализация.
 
@@ -410,16 +427,17 @@ winws --wf-tcp-out=443 \
 
 ## Payload (l7payload) → **unknown**
 
-Только первый пакет имеет `l7payload = L7P_MTPROTO_INITIAL`. Все остальные пакеты соединения будут `l7payload = L7P_UNKNOWN`.
+Только первый пакет имеет `l7payload = L7P_MTPROTO_INITIAL`. Все остальные пакеты соединения будут
+`l7payload = L7P_UNKNOWN`.
 
 ## Итоговая картина
 
-| Пакет | l7proto | l7payload |
-|-------|---------|-----------|
-| 1-й | `mtproto` | `mtproto_initial` |
-| 2-й | `mtproto` | `unknown` |
-| 3-й | `mtproto` | `unknown` |
-| ... | `mtproto` | `unknown` |
+| Пакет | l7proto   | l7payload         |
+|-------|-----------|-------------------|
+| 1-й   | `mtproto` | `mtproto_initial` |
+| 2-й   | `mtproto` | `unknown`         |
+| 3-й   | `mtproto` | `unknown`         |
+| ...   | `mtproto` | `unknown`         |
 
 ## Что это значит для фильтров
 
@@ -431,9 +449,11 @@ winws --wf-tcp-out=443 \
 ```
 
 Поэтому типичная конфигурация:
+
 ```bash
 --filter-l7=mtproto --payload=mtproto_initial --lua-desync=...
 ```
+
 Обработает только первый пакет, а остальные пройдут мимо (payload не совпадёт).
 
 ## Механизм запоминания
@@ -481,13 +501,16 @@ winws --wf-tcp-out=443 \
 ## Ключ соединения
 
 Conntrack идентифицирует соединение по кортежу:
+
 - Source IP + Source Port
-- Destination IP + Destination Port  
+- Destination IP + Destination Port
 - Protocol (TCP/UDP)
 
-Все пакеты с одинаковым кортежом принадлежат одному соединению и используют **одну и ту же структуру ctrack** с сохранённым `l7proto`.
+Все пакеты с одинаковым кортежом принадлежат одному соединению и используют **одну и ту же структуру ctrack** с
+сохранённым `l7proto`.
 
-Поэтому даже когда после первого пакета идёт "мусор" — zapret **не анализирует содержимое**, а просто смотрит "этот пакет от того же соединения? → значит это MTProto".
+Поэтому даже когда после первого пакета идёт "мусор" — zapret **не анализирует содержимое**, а просто смотрит "этот
+пакет от того же соединения? → значит это MTProto".
 
 Покажу примеры для MTProto с разной логикой:
 
@@ -496,17 +519,17 @@ Conntrack идентифицирует соединение по кортежу:
 Дурим DPI только на инициализации — этого обычно достаточно:
 
 ```bash
-winws --wf-tcp-out=443 \
+winws2 --wf-tcp-out=443 \
   --filter-l7=mtproto \
   --payload=mtproto_initial \
   --lua-desync=fake:blob=0x00000000:ip_ttl=5:tcp_md5 \
   --lua-desync=split:pos=8
 ```
 
-| Пакет | Обработка |
-|-------|-----------|
+| Пакет         | Обработка      |
+|---------------|----------------|
 | 1-й (initial) | ✅ fake + split |
-| 2-й и далее | ❌ пропуск |
+| 2-й и далее   | ❌ пропуск      |
 
 ---
 
@@ -515,7 +538,7 @@ winws --wf-tcp-out=443 \
 Если DPI анализирует весь поток (редко, но бывает):
 
 ```bash
-winws --wf-tcp-out=443 \
+winws2 --wf-tcp-out=443 \
   --filter-l7=mtproto \
   --out-range=-d20 \
   --lua-desync=split:pos=8
@@ -523,15 +546,15 @@ winws --wf-tcp-out=443 \
 
 | Пакет | Обработка |
 |-------|-----------|
-| 1-20 | ✅ split |
-| 21+ | ❌ пропуск |
+| 1-20  | ✅ split   |
+| 21+   | ❌ пропуск |
 
 ---
 
 ## 3. Разная логика для initial и остальных
 
 ```bash
-winws --wf-tcp-out=443 \
+winws2 --wf-tcp-out=443 \
   --filter-l7=mtproto --payload=mtproto_initial \
     --lua-desync=fake:blob=0x00000000:ip_ttl=3:tcp_md5 \
     --lua-desync=disorder:pos=8 \
@@ -540,18 +563,18 @@ winws --wf-tcp-out=443 \
     --lua-desync=split:pos=16
 ```
 
-| Пакет | Обработка |
-|-------|-----------|
+| Пакет         | Обработка       |
+|---------------|-----------------|
 | 1-й (initial) | fake + disorder |
-| 2-10 | split |
-| 11+ | пропуск |
+| 2-10          | split           |
+| 11+           | пропуск         |
 
 ---
 
 ## 4. MTProto + TLS + HTTP в одном инстансе
 
 ```bash
-winws --wf-tcp-out=80,443 \
+winws2 --wf-tcp-out=80,443 \
   --lua-init=@zapret-lib.lua \
   --lua-init=@zapret-antidpi.lua \
   \
@@ -568,18 +591,18 @@ winws --wf-tcp-out=80,443 \
     --lua-desync=split:pos=host+1
 ```
 
-| Протокол | Payload | Обработка |
-|----------|---------|-----------|
-| MTProto | initial | fake + split |
-| TLS | client_hello | fake с dupsid + multisplit |
-| HTTP | request | fake + split по host |
+| Протокол | Payload      | Обработка                  |
+|----------|--------------|----------------------------|
+| MTProto  | initial      | fake + split               |
+| TLS      | client_hello | fake с dupsid + multisplit |
+| HTTP     | request      | fake + split по host       |
 
 ---
 
 ## 5. Только MTProto, игнорировать всё остальное (тоже что и первый)
 
 ```bash
-winws --wf-tcp-out=443 \
+winws2 --wf-tcp-out=443 \
   --filter-l7=mtproto \
   --payload=mtproto_initial \
   --lua-desync=fake:blob=0x00000000:ip_ttl=4:repeats=3 \
@@ -593,7 +616,7 @@ TLS на 443 пройдёт мимо — `--filter-l7=mtproto` его отфил
 ## 6. Всё кроме MTProto
 
 ```bash
-winws --wf-tcp-out=80,443 \
+winws2 --wf-tcp-out=80,443 \
   --filter-l7=tls,http \
   --payload=tls_client_hello,http_req \
   --lua-desync=fake:blob=fake_default_tls:tcp_md5 \
@@ -607,7 +630,7 @@ MTProto на 443 пройдёт без обработки — он не в `--fi
 ## 7. Агрессивный режим — все known протоколы
 
 ```bash
-winws --wf-tcp-out=443 \
+winws2 --wf-tcp-out=443 \
   --filter-l7=known \
   --out-range=-d5 \
   --lua-desync=disorder:pos=8
@@ -615,17 +638,17 @@ winws --wf-tcp-out=443 \
 
 | l7proto | Обработка |
 |---------|-----------|
-| mtproto | ✅ |
-| tls | ✅ |
-| http | ✅ |
-| unknown | ❌ |
+| mtproto | ✅         |
+| tls     | ✅         |
+| http    | ✅         |
+| unknown | ❌         |
 
 ---
 
 ## Сводная таблица фильтров
 
 | Фильтр                      | Что матчит                  |
-| --------------------------- | --------------------------- |
+|-----------------------------|-----------------------------|
 | `--filter-l7=mtproto`       | Только MTProto соединения   |
 | `--filter-l7=known`         | Все распознанные протоколы  |
 | `--filter-l7=unknown`       | Нераспознанные соединения   |
