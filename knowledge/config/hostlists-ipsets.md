@@ -4,7 +4,7 @@ zapret2-version: v0.9.4.5
 tags: hostlist, ipset, filtering, domains, ip, include, exclude, gzip, auto-reload, sighup
 source: deepwiki/bol-van/zapret2, official-docs
 created: 2026-03-28
-updated: 2026-03-28
+updated: 2026-04-15
 ---
 
 # Хостлисты и IP-множества (IPsets)

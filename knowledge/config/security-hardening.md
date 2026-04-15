@@ -4,7 +4,7 @@ zapret2-version: v0.9.4.5
 tags: security, seccomp, capabilities, privilege, droproot, sandbox, hardening, cap_net_admin, daemonize
 source: deepwiki/bol-van/zapret2, official-docs
 created: 2026-03-28
-updated: 2026-03-28
+updated: 2026-04-15
 ---
 
 # Security Hardening
@@ -54,7 +54,6 @@ BPF-фильтр блокирует опасные системные вызов
 
 ## Lua Sandbox
 
-- FFI-модуль **отключён** в LuaJIT → невозможен произвольный доступ к памяти
 - Stack guards (`LUA_STACK_GUARD_ENTER/LEAVE`) защищают от corruption при C↔Lua переходах
 - Lua-окружение изолировано от файловой системы и опасных операций
 
@@ -62,7 +61,7 @@ BPF-фильтр блокирует опасные системные вызов
 
 - `fork()` — отсоединение от родительского процесса
 - `setsid()` — создание новой группы процессов
-- `chdir("/")` — освобождение смонтированных файловых систем
+- `chdir(cwd)` — возврат в сохранённую рабочую директорию
 - fd 0, 1, 2 → `/dev/null` — изоляция I/O
 
 ## Windows (winws2)

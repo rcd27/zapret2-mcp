@@ -4,7 +4,7 @@ zapret2-version: v0.9.4.5
 tags: auto-hostlist, failure detection, retransmission, rst, redirect, autohostlist, blocking detection
 source: deepwiki/bol-van/zapret2, official-docs
 created: 2026-03-28
-updated: 2026-03-28
+updated: 2026-04-15
 ---
 
 # Авто-хостлист и детекция отказов
@@ -31,7 +31,7 @@ updated: 2026-03-28
 
 ### Детекция TCP-ретрансмиссий
 
-Функция `is_retransmission()` сравнивает sequence текущего пакета с отслеженной позицией (`ctrack->pos.client.tcp.uppos_prev`). Когда `req_retrans_counter` достигает `hostlist_auto_retrans_threshold` — вызывается `auto_hostlist_failed()`.
+Функция `is_retransmission()` сравнивает sequence текущего пакета с отслеженной позицией (`ctrack->pos.client.uppos_prev`). Когда `req_retrans_counter` достигает `hostlist_auto_retrans_threshold` — вызывается `auto_hostlist_failed()`.
 
 Опционально: `hostlist_auto_retrans_reset` — отправка spoofed RST для сброса цикла ретрансмиссий.
 

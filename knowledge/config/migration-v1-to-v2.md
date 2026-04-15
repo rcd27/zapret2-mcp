@@ -4,14 +4,15 @@ zapret2-version: v0.9.4.5
 tags: migration, v1, v2, lua-desync, dpi-desync, config, conversion, profiles, lua
 source: community
 created: 2026-03-28
-updated: 2026-03-28
+updated: 2026-04-15
 ---
 
 # Миграция стратегий с zapret v1 на zapret2
 
 ## Зачем мигрировать
 
-zapret2 (nfqws2) использует новый синтаксис `--lua-desync` вместо старого `--dpi-desync`. Старый синтаксис **всё ещё работает** в zapret2 (обратная совместимость), но:
+zapret2 (nfqws2) использует новый синтаксис `--lua-desync` вместо старого `--dpi-desync`. Старый синтаксис
+`--dpi-desync` **не поддерживается** в nfqws2 — он работает только в nfqws1. Причины мигрировать:
 
 - Новый lua-формат более гибкий и позволяет комбинировать инстансы
 - Многосекционные конфиги (`--new`) — только в zapret2
@@ -32,57 +33,57 @@ zapret2 (nfqws2) использует новый синтаксис `--lua-desyn
 
 ### Стратегии → Actions
 
-| zapret v1 (`--dpi-desync=`) | zapret2 (`--lua-desync=`) | Заметки |
-|---|---|---|
-| `split2` | `multisplit` | Указать `pos=` |
-| `disorder2` | `multidisorder` | Указать `pos=` |
-| `fake` | `fake` | + `blob=` для payload |
-| `fake,split2` | Два `--lua-desync`: `fake:...` и `multisplit:...` | Разделяются на инстансы |
-| `fake,disorder2` | Два `--lua-desync`: `fake:...` и `multidisorder:...` | |
-| `fake,multisplit` | Два `--lua-desync`: `fake:...` и `multisplit:...` | |
-| `fake,multidisorder` | Два `--lua-desync`: `fake:...` и `multidisorder:...` | |
-| `fakedsplit` | `fakedsplit` | Комбинированный fake+split |
-| `ipfrag2` | `ipfrag2` | Без изменений |
+| zapret v1 (`--dpi-desync=`) | zapret2 (`--lua-desync=`)                            | Заметки                                                                     |
+|-----------------------------|------------------------------------------------------|-----------------------------------------------------------------------------|
+| `split2`                    | `multisplit`                                         | Указать `pos=`                                                              |
+| `disorder2`                 | `multidisorder`                                      | Указать `pos=`                                                              |
+| `fake`                      | `fake`                                               | + `blob=` для payload                                                       |
+| `fake,split2`               | Два `--lua-desync`: `fake:...` и `multisplit:...`    | Разделяются на инстансы                                                     |
+| `fake,disorder2`            | Два `--lua-desync`: `fake:...` и `multidisorder:...` |                                                                             |
+| `fake,multisplit`           | Два `--lua-desync`: `fake:...` и `multisplit:...`    |                                                                             |
+| `fake,multidisorder`        | Два `--lua-desync`: `fake:...` и `multidisorder:...` |                                                                             |
+| `fakedsplit`                | `fakedsplit`                                         | Комбинированный fake+split                                                  |
+| `ipfrag2`                   | `send:ipfrag` + `drop`                               | Два инстанса: `--lua-desync=send:ipfrag:ipfrag_pos_udp=8 --lua-desync=drop` |
 
 ### Параметры split/disorder
 
-| zapret v1 | zapret2 (внутри lua-desync) | Пример |
-|---|---|---|
-| `--dpi-desync-split-pos=1,midsld` | `pos=1,midsld` | `--lua-desync=multisplit:pos=1,midsld` |
-| `--dpi-desync-split-seqovl=681` | `seqovl=681` | `--lua-desync=multisplit:pos=10:seqovl=1` |
-| `--dpi-desync-repeats=11` | `repeats=11` | `--lua-desync=fake:repeats=11` |
+| zapret v1                         | zapret2 (внутри lua-desync) | Пример                                    |
+|-----------------------------------|-----------------------------|-------------------------------------------|
+| `--dpi-desync-split-pos=1,midsld` | `pos=1,midsld`              | `--lua-desync=multisplit:pos=1,midsld`    |
+| `--dpi-desync-split-seqovl=681`   | `seqovl=681`                | `--lua-desync=multisplit:pos=10:seqovl=1` |
+| `--dpi-desync-repeats=11`         | `repeats=11`                | `--lua-desync=fake:repeats=11`            |
 
 ### Параметры fake
 
-| zapret v1 | zapret2 | Пример |
-|---|---|---|
-| `--dpi-desync-fake-tls=/path/file.bin` | `blob=@/path/file.bin` | |
-| `--dpi-desync-fake-tls=0x00000000` | `blob=0x00000000` | |
-| (стандартный fake) | `blob=fake_default_tls` | Предопределённый blob |
-| `--dpi-desync-fake-tls-mod=rnd,dupsid,sni=X` | `tls_mod=rnd,dupsid,sni=X` | |
+| zapret v1                                    | zapret2                                         | Пример                                   |
+|----------------------------------------------|-------------------------------------------------|------------------------------------------|
+| `--dpi-desync-fake-tls=/path/file.bin`       | `--blob=my_tls:@/path/file.bin` + `blob=my_tls` | Загрузка через `--blob`, ссылка по имени |
+| `--dpi-desync-fake-tls=0x00000000`           | `blob=0x00000000`                               | Inline hex работает                      |
+| (стандартный fake)                           | `blob=fake_default_tls`                         | Предопределённый blob                    |
+| `--dpi-desync-fake-tls-mod=rnd,dupsid,sni=X` | `tls_mod=rnd,dupsid,sni=X`                      |                                          |
 
 ### Fooling параметры
 
-| zapret v1 | zapret2 | Заметки |
-|---|---|---|
-| `--dpi-desync-fooling=md5sig` | `tcp_md5` | Внутри lua-desync |
-| `--dpi-desync-fooling=badseq` | `tcp_seq=<offset>` | Нужно указать offset |
-| `--dpi-desync-fooling=badsum` | `badsum` | |
-| `--dpi-desync-fooling=ip_autottl` | (см. документацию) | |
-| `--dpi-desync-ttl=3` | `ip_ttl=3` | |
-| `--ip-id=zero` | `ip_id=rnd` | Не точный аналог |
+| zapret v1                         | zapret2            | Заметки              |
+|-----------------------------------|--------------------|----------------------|
+| `--dpi-desync-fooling=md5sig`     | `tcp_md5`          | Внутри lua-desync    |
+| `--dpi-desync-fooling=badseq`     | `tcp_seq=<offset>` | Нужно указать offset |
+| `--dpi-desync-fooling=badsum`     | `badsum`           |                      |
+| `--dpi-desync-fooling=ip_autottl` | (см. документацию) |                      |
+| `--dpi-desync-ttl=3`              | `ip_ttl=3`         |                      |
+| `--ip-id=zero`                    | `ip_id=rnd`        | Не точный аналог     |
 
 ### Фильтры
 
-| zapret v1 | zapret2 | Заметки |
-|---|---|---|
-| `--filter-tcp=443` | `--filter-tcp=443` | Без изменений |
-| `--hostlist=/path/file.txt` | `--hostlist=/path/file.txt` | Без изменений |
-| (нет аналога) | `--filter-l7=tls` | Новое: L7-фильтрация |
-| (нет аналога) | `--payload=tls_client_hello` | Новое: фильтр по payload |
-| (нет аналога) | `--hostlist-domains=a.com,b.com` | Новое: inline domains |
-| (нет аналога) | `--name=youtube` | Новое: именование секций |
-| (нет аналога) | `--new` | Новое: разделитель секций |
+| zapret v1                   | zapret2                          | Заметки                   |
+|-----------------------------|----------------------------------|---------------------------|
+| `--filter-tcp=443`          | `--filter-tcp=443`               | Без изменений             |
+| `--hostlist=/path/file.txt` | `--hostlist=/path/file.txt`      | Без изменений             |
+| (нет аналога)               | `--filter-l7=tls`                | Новое: L7-фильтрация      |
+| (нет аналога)               | `--payload=tls_client_hello`     | Новое: фильтр по payload  |
+| (нет аналога)               | `--hostlist-domains=a.com,b.com` | Новое: inline domains     |
+| (нет аналога)               | `--name=youtube`                 | Новое: именование секций  |
+| (нет аналога)               | `--new`                          | Новое: разделитель секций |
 
 ## Примеры миграции
 
@@ -117,7 +118,8 @@ NFQWS2_OPT="--filter-tcp=443 --filter-l7=tls
   --lua-desync=multidisorder:pos=1,midsld"
 ```
 
-**Важно**: в v1 `fake,multidisorder` — это одна директива. В v2 это **два отдельных** `--lua-desync`, каждый со своими параметрами.
+**Важно**: в v1 `fake,multidisorder` — это одна директива. В v2 это **два отдельных** `--lua-desync`, каждый со своими
+параметрами.
 
 ### Пример 3: Полный многосекционный конфиг
 
@@ -150,19 +152,25 @@ NFQWS2_OPT="
 ## Автоматический конвертер
 
 Community-инструмент для автоматической конвертации:
+
 - **nfqws-zapret-converter**: `github.com/whxtelxs/nfqws-zapret-converter`
 
 ## Что нельзя конвертировать 1-в-1
 
-- `--dpi-desync-fooling=badseq` в v1 автоматически подбирал increment. В v2 нужно явно указать `tcp_seq=<offset>` (часто `-10000` или `-66000`)
+- `--dpi-desync-fooling=badseq` в v1 автоматически подбирал increment. В v2 нужно явно указать `tcp_seq=<offset>` (часто
+  `-10000` или `-66000`)
 - `--dpi-desync-fooling=badseq --dpi-desync-badseq-increment=0` → в v2 это `tcp_seq=0` или отдельная логика
-- Параметр `<HOSTLIST>` в v1 подставлялся автоматически в зависимости от `MODE_FILTER`. В v2 рекомендуется указывать hostlist явно
-- В v1 отдельные переменные `NFQWS_OPT_DESYNC_QUIC`, `NFQWS_OPT_DESYNC_HTTP` и т.д. В v2 всё в одном `NFQWS2_OPT` через секции `--new`
+- Параметр `<HOSTLIST>` в v1 подставлялся автоматически в зависимости от `MODE_FILTER`. В v2 рекомендуется указывать
+  hostlist явно
+- В v1 отдельные переменные `NFQWS_OPT_DESYNC_QUIC`, `NFQWS_OPT_DESYNC_HTTP` и т.д. В v2 всё в одном `NFQWS2_OPT` через
+  секции `--new`
 
 ## Совет
 
-Не обязательно конвертировать. zapret2 **поддерживает старый синтаксис** `--dpi-desync`. Если v1-стратегия работает — можно использовать как есть. Мигрировать на lua-desync стоит когда:
-- Нужны разные стратегии для разных доменов (секции `--new`)
-- Нужна L7-фильтрация (`--filter-l7=tls,quic,mtproto`)
-- Нужен inline hostlist (`--hostlist-domains=`)
-- Стратегия перестала работать и нужна более тонкая настройка
+Миграция обязательна при переходе с nfqws1 на nfqws2 — старый синтаксис `--dpi-desync` **не поддерживается** в nfqws2.
+Пакет zapret2 включает оба бинарника (nfqws1 и nfqws2), но рекомендуется nfqws2 для:
+
+- Разных стратегий для разных доменов (секции `--new`)
+- L7-фильтрации (`--filter-l7=tls,quic,mtproto`)
+- Inline hostlists (`--hostlist-domains=`)
+- Более тонкой настройки через Lua-инстансы
