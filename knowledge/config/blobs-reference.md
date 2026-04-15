@@ -4,7 +4,7 @@ zapret2-version: v0.9.4.5
 tags: blobs, fake, payload, tls, quic, wireguard, discord, reference
 source: official-docs
 created: 2026-03-28
-updated: 2026-03-28
+updated: 2026-04-15
 ---
 
 # Blobs: бинарные образцы пакетов
@@ -20,13 +20,13 @@ Blobs — бинарные файлы-образцы пакетов в `/opt/zap
 |---|---|
 | `tls_clienthello_www_google_com.bin` | Google |
 | `tls_clienthello_vk_com.bin` | VK |
-| `tls_clienthello_t2_ru.bin` | Tele2 |
 | `tls_clienthello_gosuslugi_ru.bin` | Госуслуги |
 | `tls_clienthello_sberbank_ru.bin` | Сбербанк |
 | `tls_clienthello_iana_org.bin` | IANA |
-| `tls_clienthello_www_4pda_to.bin` | 4PDA |
-| `tls_clienthello_www_max_ru.bin` | Max.ru |
-| `tls_clienthello_*_kyber.bin` | С Kyber (пост-квант) |
+| `tls_clienthello_iana_org_bigsize.bin` | IANA (увеличенный размер) |
+| `tls_clienthello_google_com_tlsrec.bin` | Google (TLS Record) |
+| `tls_clienthello_rutracker_org_kyber.bin` | RuTracker с Kyber (пост-квант) |
+| `tls_clienthello_vk_com_kyber.bin` | VK с Kyber (пост-квант) |
 
 ## QUIC Initial
 
@@ -34,9 +34,14 @@ Blobs — бинарные файлы-образцы пакетов в `/opt/zap
 |---|---|
 | `quic_initial_www_google_com.bin` | Google |
 | `quic_initial_facebook_com.bin` | Facebook |
+| `quic_initial_facebook_com_quiche.bin` | Facebook (quiche) |
 | `quic_initial_vk_com.bin` | VK |
 | `quic_initial_rutracker_org.bin` | RuTracker |
-| `quic_initial_kyber.bin` | С Kyber |
+| `quic_initial_rutracker_org_kyber_1.bin` | RuTracker с Kyber (часть 1) |
+| `quic_initial_rutracker_org_kyber_2.bin` | RuTracker с Kyber (часть 2) |
+| `quic_initial_rr1---sn-*_googlevideo_com_kyber_*.bin` | Googlevideo с Kyber |
+| `quic2_example_com.bin` | QUIC v2 |
+| `quic_short_header.bin` | QUIC Short Header |
 
 ## Другие протоколы
 
@@ -48,8 +53,8 @@ Blobs — бинарные файлы-образцы пакетов в `/opt/zap
 | `dht_find_node.bin` | BitTorrent DHT find_node |
 | `wireguard_initiation.bin` | WireGuard Initiation |
 | `wireguard_response.bin` | WireGuard Response |
-| `discord-ip-discovery-*.bin` | Discord IP Discovery |
-| `sip.bin` | SIP протокол |
+| `discord-ip-discovery-with-port.bin` | Discord IP Discovery (с портом) |
+| `discord-ip-discovery-without-port.bin` | Discord IP Discovery (без порта) |
 | `sip_register.bin` | SIP REGISTER |
 | `rdp.bin` | RDP |
 | `dns.bin` | DNS запрос |
@@ -60,9 +65,10 @@ Blobs — бинарные файлы-образцы пакетов в `/opt/zap
 | `snmp_get_next_request.bin` | SNMP GetNextRequest |
 | `rtsp_options.bin` | RTSP OPTIONS |
 | `tls_alert.bin` | TLS Alert |
-| `tls_clienthello_google_com_tlsrec.bin` | Google (TLS Record) |
 | `tls_serverhello_google_com_tls13.bin` | Google ServerHello TLS 1.3 |
+| `dtls_clienthello_w3_org.bin` | DTLS ClientHello |
 | `dtls_serverhello.bin` | DTLS ServerHello |
+| `isakmp_initiator_request.bin` | IKE/ISAKMP Initiator Request |
 
 ## Служебные
 
@@ -77,8 +83,9 @@ Blobs — бинарные файлы-образцы пакетов в `/opt/zap
 ### В стратегиях (lua-desync)
 
 ```
-# По имени (blob загружен в память при старте):
---lua-desync=fake:blob=blob_tls_clienthello_www_google_com:tcp_md5
+# По имени файла из /opt/zapret2/files/fake/ (нужно загрузить через --blob):
+--blob=goo_tls:@/opt/zapret2/files/fake/tls_clienthello_www_google_com.bin
+--lua-desync=fake:blob=goo_tls:tcp_md5
 
 # Inline hex:
 --lua-desync=fake:blob=0x0F0F0F0F
@@ -119,4 +126,6 @@ curl -k --resolve example.com:443:IP_РОУТЕРА https://example.com:8443/
 
 ### Управление памятью
 
-Каждый включённый blob загружается в память nfqws2 при старте. Включать только те blobs, которые реально используются в стратегиях.
+Три встроенных blob-а (`fake_default_tls`, `fake_default_http`, `fake_default_quic`) загружаются в память nfqws2 автоматически
+при старте. Остальные blobs загружаются **только при явном указании** через `--blob=имя:@путь`. Файлы из
+`/opt/zapret2/files/fake/` НЕ загружаются автоматически — их нужно подключить через `--blob`.
