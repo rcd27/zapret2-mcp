@@ -4,7 +4,7 @@ zapret2-version: v0.9.4.5
 tags: udp, quic, ipfrag2, udplen, udplen-pattern, fragmentation, fake-quic, youtube, repeats
 source: official-docs, community
 created: 2026-03-25
-updated: 2026-03-30
+updated: 2026-04-15
 ---
 
 # UDP/QUIC стратегии
@@ -16,24 +16,20 @@ updated: 2026-03-30
 ### IP-фрагментация (ipfrag2)
 
 ```
---dpi-desync=ipfrag2
+--lua-desync=send:ipfrag:ipfrag_pos_udp=8
+--lua-desync=drop
 ```
 
 Фрагментирует IP-пакеты так, чтобы DPI не мог пересобрать. Работает для stateless DPI.
+`ipfrag_pos_udp=8` — позиция разбиения (по умолчанию 8 байт от начала L4-заголовка).
 
 ### UDP padding (udplen)
 
 ```
---dpi-desync-udplen-increment=N
+--lua-desync=udplen:increment=N
 ```
 
 Добавляет padding к UDP-пакетам. Меняет сигнатуру пакета, DPI не распознаёт.
-
-Lua-формат:
-
-```
---lua-desync=fake:blob=fake_default_quic:udplen=N
-```
 
 #### udplen-pattern
 
@@ -41,13 +37,7 @@ Lua-формат:
 байтов:
 
 ```
---dpi-desync-udplen-pattern=0xFEA82025
-```
-
-Lua-формат:
-
-```
---lua-desync=fake:blob=fake_default_quic:udplen=8:udplen_pattern=0x0F0F0E0F
+--lua-desync=udplen:increment=8:pattern=0x0F0F0E0F
 ```
 
 Community-практика: паттерны `0xFEA82025` и `0x0F0F0E0F` зарекомендовали себя для QUIC YouTube. Они могут напоминать
@@ -56,16 +46,10 @@ Community-практика: паттерны `0xFEA82025` и `0x0F0F0E0F` зар
 ### Fake QUIC
 
 ```
---dpi-desync-fake-quic=<file>
-```
-
-Кастомный fake QUIC Initial payload.
-
-Lua-формат:
-
-```
 --lua-desync=fake:blob=fake_default_quic:repeats=6
 ```
+
+Кастомный fake QUIC Initial payload. Для загрузки blob из файла: `--blob=my_quic:@/path/to/file.bin`, затем `blob=my_quic`.
 
 #### Выбор fake QUIC blob
 
@@ -117,16 +101,17 @@ Fake-пакет + модификация длины реального:
 
 Инкремент 4-25 байт — DPI не распознаёт QUIC Initial по размеру.
 
-### Cutoff: когда прекратить обработку
+### Ограничение обработки (out-range)
 
-`cutoff` ограничивает обработку первыми N пакетами UDP-потока:
+`--out-range` ограничивает обработку по позиции в потоке, снижая нагрузку на CPU:
 
 ```
---lua-desync=fake:blob=fake_default_quic:repeats=6:cutoff=3
+--out-range=-n3
+--lua-desync=fake:blob=fake_default_quic:repeats=6
 ```
 
-`cutoff=3` — обработать только первые 3 пакета (QUIC Initial handshake). Остальной QUIC-трафик проходит без модификации,
-снижая нагрузку.
+`--out-range=-n3` — обработать только первые 3 пакета (QUIC Initial handshake). Остальной QUIC-трафик проходит без
+модификации. Для TCP-потоков типичное значение — `--out-range=-s34228` (~25 пакетов).
 
 ## Особенности QUIC
 
@@ -147,12 +132,13 @@ QUIC — самый сложный протокол для bypass:
   --lua-desync=fake:blob=fake_default_quic:repeats=6
 ```
 
-Продвинутый (с udplen-pattern и конкретным blob):
+Продвинутый (с udplen-pattern, конкретным blob и ограничением обработки):
 
 ```
 --filter-udp=443 --filter-l7=quic
   --payload=quic_initial
-  --lua-desync=fake:blob=quic_initial_www_google_com:udplen=8:udplen_pattern=0x0F0F0E0F:repeats=2:cutoff=3
+  --out-range=-n3
+  --lua-desync=fake:blob=quic_initial_www_google_com:udplen=8:udplen_pattern=0x0F0F0E0F:repeats=2
 ```
 
 ## Протоколы и сложность bypass
