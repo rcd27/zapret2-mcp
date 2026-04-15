@@ -4,7 +4,7 @@ zapret2-version: v0.9.4.5
 tags: profiles, desync, new, filter, matching, template, import, lua-desync, l7, l3, l4
 source: deepwiki/bol-van/zapret2, official-docs
 created: 2026-03-28
-updated: 2026-03-28
+updated: 2026-04-15
 ---
 
 # Система desync-профилей
@@ -35,7 +35,7 @@ updated: 2026-03-28
 
 | Уровень | Фильтр | Пример |
 |---------|--------|--------|
-| L3 | IPv4/IPv6 | `--filter-ipv4`, `--filter-ipv6` |
+| L3 | IPv4/IPv6 | `--filter-l3=ipv4\|ipv6` |
 | L4 | Протокол и порты | `--filter-tcp=443`, `--filter-udp=443` |
 | L7 | Прикладной протокол | `--filter-l7=tls,quic,http,mtproto` |
 | IPset | IP-диапазоны | `--ipset=/path/to/ips.txt` |
@@ -106,8 +106,8 @@ updated: 2026-03-28
   --lua-desync=fake:blob=fake_default_tls:tcp_md5:repeats=11
   --lua-desync=multidisorder:pos=1,midsld
 --new
---name=discord --filter-udp=50000-50100 --filter-l7=quic
-  --lua-desync=fake:blob=fake_default_quic:repeats=6
+--name=discord --filter-udp=50000-50100 --filter-l7=discord,stun
+  --lua-desync=fake:blob=0x00:repeats=6
 --new
 --name=other --filter-tcp=443 --filter-l7=tls --payload=tls_client_hello
   --lua-desync=multisplit:pos=2
