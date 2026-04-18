@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.7.11](https://github.com/rcd27/zapret2-mcp/compare/v0.7.10...v0.7.11) (2026-04-18)
+
+
+### Bug Fixes
+
+* **ci:** remove redundant npm upgrade and registry config from publish workflow ([30ebfe5](https://github.com/rcd27/zapret2-mcp/commit/30ebfe5a61e7c8ead22b3166804b0dd56c53fde4))
+
 ## [0.7.10](https://github.com/rcd27/zapret2-mcp/compare/v0.7.9...v0.7.10) (2026-04-15)
 
 
