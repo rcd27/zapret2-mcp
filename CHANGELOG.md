@@ -1,5 +1,20 @@
 # Changelog
 
+## [0.7.10](https://github.com/rcd27/zapret2-mcp/compare/v0.7.9...v0.7.10) (2026-04-15)
+
+
+### Bug Fixes
+
+* **blobs:** три несуществующих блоба, добавлены недостающие, фикс синтаксиса, уточнения ([83a3eea](https://github.com/rcd27/zapret2-mcp/commit/83a3eea90cce90c90b29f4320bc0ada8ef633367))
+* **config:** остальные правки по разделу ([9a397ac](https://github.com/rcd27/zapret2-mcp/commit/9a397ac24fbd27194828e8bb6ea2ad08050f3e53))
+* **desync-profiles:** voice в дискорде ([e20d97f](https://github.com/rcd27/zapret2-mcp/commit/e20d97f98b3eff83bdbe659a67587cc735f23aa8))
+* **discor-bypass:** актуальный синтаксис ([2aa0104](https://github.com/rcd27/zapret2-mcp/commit/2aa0104e3205ab00adfa78fc5c93272837521c3a))
+* **obsidian-gui:** mass-fixes ([f5648c5](https://github.com/rcd27/zapret2-mcp/commit/f5648c5c9954a7f275a93af16500724d39f8187e))
+* **platforms:** незначительные правки по платформам ([282e3b8](https://github.com/rcd27/zapret2-mcp/commit/282e3b86bcdb43cfceb5c79491244f301e61661a))
+* **tspu:** username ([de99265](https://github.com/rcd27/zapret2-mcp/commit/de99265e6979bb1ee7129fb34265a70c00ccb2fd))
+* **uci:** массовые правки, удаление CLI утилиты ([c65e2ae](https://github.com/rcd27/zapret2-mcp/commit/c65e2ae544b521ec6ef6db173b5ec58f4999bd5c))
+* **udp-quick:** udp-len ([ec22599](https://github.com/rcd27/zapret2-mcp/commit/ec225995b642c363becbed00b56154c562f50278))
+
 ## [0.7.9](https://github.com/rcd27/zapret2-mcp/compare/v0.7.8...v0.7.9) (2026-04-02)
 
 
