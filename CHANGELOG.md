@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.7.12](https://github.com/rcd27/zapret2-mcp/compare/v0.7.11...v0.7.12) (2026-04-18)
+
+
+### Bug Fixes
+
+* **ci:** add registry-url to setup-node for OIDC provenance publish ([3aed347](https://github.com/rcd27/zapret2-mcp/commit/3aed3471c3bf8f458c08cfc93a1205dfc93ecce1))
+
 ## [0.7.11](https://github.com/rcd27/zapret2-mcp/compare/v0.7.10...v0.7.11) (2026-04-18)
 
 
