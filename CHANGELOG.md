@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.7.13](https://github.com/rcd27/zapret2-mcp/compare/v0.7.12...v0.7.13) (2026-07-10)
+
+
+### Features
+
+* **ip-throttling:** руководство по диагностике IP-троттлинга ([7d0bdde](https://github.com/rcd27/zapret2-mcp/commit/7d0bdde8ce6cdd315ae6d1418b38695fcc928807))
+* **ip-throttling:** руководство по диагностике IP-троттлинга ([806758c](https://github.com/rcd27/zapret2-mcp/commit/806758c206aae40756830d85fe44caeaee26981f))
+
 ## [0.7.12](https://github.com/rcd27/zapret2-mcp/compare/v0.7.11...v0.7.12) (2026-04-18)
 
 
