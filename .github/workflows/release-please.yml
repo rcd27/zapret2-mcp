@@ -23,7 +23,7 @@ jobs:
 
   publish:
     needs: release-please
-    if: ${{ needs.release-please.outputs.release_created }}
+    if: ${{ needs.release-please.outputs.release_created == 'true' }}
     runs-on: ubuntu-latest
 
     permissions:
@@ -35,14 +35,31 @@ jobs:
         with:
           submodules: false
 
+      # Node 24 ships npm 11.16+; trusted publishing (OIDC auth to the registry)
+      # requires npm >= 11.5.1. Node 22 ships npm 10.x and fails with a
+      # misleading "404 Not Found - PUT".
+      # No cache: release builds must resolve deps from the registry.
       - uses: actions/setup-node@v4
         with:
-          node-version: 22
-          cache: npm
+          node-version: 24
           registry-url: https://registry.npmjs.org
+
+      - name: Verify npm supports trusted publishing
+        run: |
+          NPM_V=$(npm --version)
+          echo "npm $NPM_V / node $(node --version)"
+          node -e '
+            const [a, b, c] = process.argv[1].split(".").map(Number);
+            if (a < 11 || (a === 11 && (b < 5 || (b === 5 && c < 1)))) {
+              console.error("npm >= 11.5.1 required for trusted publishing, got " + process.argv[1]);
+              process.exit(1);
+            }' "$NPM_V"
 
       - run: npm ci
       - run: npm run build
       - run: npm test
 
+      # Auth comes from the GitHub OIDC token (id-token: write) matched against
+      # the trusted publisher configured at npmjs.com/package/zapret2-mcp/access.
+      # No NODE_AUTH_TOKEN / NPM_TOKEN is involved.
       - run: npm publish --provenance --access public
